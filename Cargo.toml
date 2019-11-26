@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "nazara_audio",
+    "nazara_gfx",
+    "nazara_net",
+]
