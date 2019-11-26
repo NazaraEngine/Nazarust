@@ -2,6 +2,7 @@
 
 members = [
     "nazara_audio",
+    "nazara_core",
     "nazara_gfx",
     "nazara_net",
 ]
