@@ -48,3 +48,34 @@ impl Image {
         self.dimensions
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::image::Image;
+    use crate::enums::{PixelFormatType, ImageType};
+    use cgmath::Vector3;
+
+    #[test]
+    fn test_new_1d () {
+        let new_1d = Image::new_1d(PixelFormatType::A8, 50);
+        assert_eq!(new_1d.get_size(), Vector3 { x: 50, y: 1, z: 1 });
+        assert_eq!(new_1d.get_pixel_format(), PixelFormatType::A8);
+        assert_eq!(new_1d.get_image_type(), ImageType::Single1D);
+    }
+
+    #[test]
+    fn test_new_2d () {
+        let new_2d = Image::new_2d(PixelFormatType::A8, 50, 60);
+        assert_eq!(new_2d.get_size(), Vector3 { x: 50, y: 60, z: 1 });
+        assert_eq!(new_2d.get_pixel_format(), PixelFormatType::A8);
+        assert_eq!(new_2d.get_image_type(), ImageType::Single2D);
+    }
+
+    #[test]
+    fn test_new_3d () {
+        let new_3d = Image::new_3d(PixelFormatType::A8, 50, 60, 70);
+        assert_eq!(new_3d.get_size(), Vector3 { x: 50, y: 60, z: 70 });
+        assert_eq!(new_3d.get_pixel_format(), PixelFormatType::A8);
+        assert_eq!(new_3d.get_image_type(), ImageType::Single3D);
+    }
+}

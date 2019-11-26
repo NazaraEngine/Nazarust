@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ImageType {
     Array1D,
     Array2D,
@@ -8,7 +8,7 @@ pub enum ImageType {
     Single3D,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum PixelFormatType {
     A8,    // 1*uint8
     BGR8,  // 3*uint8
