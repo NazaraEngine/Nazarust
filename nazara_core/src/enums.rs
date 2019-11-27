@@ -54,11 +54,11 @@ pub enum PixelFormatType {
     ///
     /// Stored in 1 uint8
     R8,
-    ///
+    /// 8 bits red signed integral pixel
     ///
     /// Stored in 1 int8
     R8I,
-    ///
+    /// 8 bits red unsigned integral pixel
     ///
     /// Stored in 1 uint8
     R8UI,
@@ -66,27 +66,27 @@ pub enum PixelFormatType {
     ///
     /// Stored in 1 uint16
     R16,
-    ///
+    /// 16 bits red float pixel
     ///
     /// Stored in 1 half
     R16F,
-    ///
+    /// 16 bits red signed integral pixel
     ///
     /// Stored in 1 int16
     R16I,
-    ///
+    /// 16 bits red unsigned integral pixel
     ///
     /// Stored in 1 uint16
     R16UI,
-    ///
+    /// 32 bits red float pixel
     ///
     /// Stored in 1 float
     R32F,
-    ///
+    /// 32 bits red signed integral pixel
     ///
     /// Stored in 1 uint16
     R32I,
-    ///
+    /// 32 bits red unsigned integral pixel
     ///
     /// Stored in 1 uint32
     R32UI,
@@ -94,11 +94,11 @@ pub enum PixelFormatType {
     ///
     /// Stored in 2 int8
     RG8,
-    ///
+    /// 8 bits red/green signed integral pixel
     ///
     /// Stored in 2 int8
     RG8I,
-    ///
+    /// 8 bits red/green unsigned integral pixel
     ///
     /// Stored in 2 uint8
     RG8UI,
@@ -106,27 +106,27 @@ pub enum PixelFormatType {
     ///
     /// Stored in 2 uint16
     RG16,
-    ///
+    /// 16 bits red/green float pixel
     ///
     /// Stored in 2 half
     RG16F,
-    ///
+    /// 16 bits red/green signed integral pixel
     ///
     /// Stored in 2 int16
     RG16I,
-    ///
+    /// 16 bits red/green unsigned integral pixel
     ///
     /// Stored in 2 uint16
     RG16UI,
-    ///
+    /// 32 bits red/green float pixel
     ///
     /// Stored in 2 float
     RG32F,
-    ///
+    /// 32 bits red/green signed integral pixel
     ///
     /// Stored in 2 uint16
     RG32I,
-    ///
+    /// 32 bits red/green unsigned integral pixel
     ///
     /// Stored in 2 uint32
     RG32UI,   // 2*uint32
@@ -138,27 +138,27 @@ pub enum PixelFormatType {
     ///
     /// Stored in 3 uint8
     RGB8,
-    ///
+    /// 16 bits RGB pixel
     ///
     /// Stored in 3 half
     RGB16F,
-    ///
+    /// 16 bits RGB signed integral pixel
     ///
     /// Stored in 4 int16
     RGB16I,   // 4*int16
-    ///
+    /// 16 bits RGB unsigned integral pixel
     ///
     /// Stored in 4 uint16
     RGB16UI,
-    ///
+    /// 32 bits RGB pixel
     ///
     /// Stored in 3 float
     RGB32F,
-    ///
+    /// 32 bits RGB signed integral pixel
     ///
     /// Stored in 4 int 32
     RGB32I,
-    ///
+    /// 32 bits RGB unsigned integral pixel
     ///
     /// Stored in 4 uint32
     RGB32UI,
@@ -170,35 +170,35 @@ pub enum PixelFormatType {
     ///
     /// Stored in 4 uint8
     RGBA8,
-    ///
+    /// 16 bits RGBA float pixel
     ///
     /// Stored in 4 half
     RGBA16F,
-    ///
+    /// 16 bits RGBA signed integral pixel
     ///
     /// Stored in 4 int16
     RGBA16I,
-    ///
+    /// 16 bits RGBA unsigned integral
     ///
     /// Stored in 4 uint16
     RGBA16UI,
-    ///
+    /// 32 bits RGBA float pixel
     ///
     /// Stored in 4 floats
     RGBA32F,
-    ///
+    /// 32 bits RGBA signed integral pixel
     ///
     /// Stored in 4 int32
     RGBA32I,
-    ///
+    /// 32 bits RGBA unsigned integral pixel
     ///
     /// Stored in 4 uint32
     RGBA32UI,
-    ///
+    /// 16 bits depth floating pixel
     ///
     /// Stored in
     Depth16,
-    ///
+    /// 24 bits depth floating pixel
     ///
     /// Stored in
     Depth24,
@@ -206,7 +206,7 @@ pub enum PixelFormatType {
     ///
     /// Stored in
     Depth24Stencil8,
-    ///
+    /// 32 bits depth floating pixel
     ///
     /// Stored in
     Depth32,
