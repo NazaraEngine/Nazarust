@@ -16,6 +16,13 @@ jobs:
           override: true
           components: rustfmt, clippy
 
+      - name: Check source formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+
   build:
     runs-on: ubuntu-latest
     needs: lint
