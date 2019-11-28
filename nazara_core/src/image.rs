@@ -6,6 +6,7 @@ use cgmath::Vector3;
 /// Mettre ici une description plus avancé, j'ai pas encore compris à quoi ça sert
 pub struct Image {
     dimensions: Vector3<usize>,
+    #[allow(dead_code)]
     content: Vec<Vec<u8>>,
     image_type: ImageType,
     pixel_format: PixelFormatType,
