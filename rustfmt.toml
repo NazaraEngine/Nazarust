@@ -1,2 +1,15 @@
+#
+# Stable features only
+#
+
+edition = "2018"
 reorder_imports = true
+
+#
+# Current unstable features:
+#
+
+# Should be removed as soon as no other unstable feature is here
+unstable_features = true
+
 merge_imports = true
