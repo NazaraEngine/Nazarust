@@ -129,7 +129,7 @@ pub enum PixelFormatType {
     /// 32 bits red/green unsigned integral pixel
     ///
     /// Stored in 2 uint32
-    RG32UI,   // 2*uint32
+    RG32UI,
     /// 16-bits RGBA pixel
     ///
     /// Stored in 3 uint5 and 1 alpha bit
@@ -145,7 +145,7 @@ pub enum PixelFormatType {
     /// 16 bits RGB signed integral pixel
     ///
     /// Stored in 4 int16
-    RGB16I,   // 4*int16
+    RGB16I,
     /// 16 bits RGB unsigned integral pixel
     ///
     /// Stored in 4 uint16
