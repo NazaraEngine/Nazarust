@@ -16,6 +16,17 @@ pub enum ImageType {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
+/// Represents the content of a pixel format
+pub enum PixelFormatContent {
+    /// Pixel format has at least one of the RGBA component
+    ColorRGBA,
+    /// Pixel format is used to store depth and stencil informations
+    DepthStencil,
+    /// Pixel format is used to store stencil informations,
+    Stencil,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
 /// Represents a pixel format type.
 pub enum PixelFormatType {
     /// 8 bits grey pixel

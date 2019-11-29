@@ -35,9 +35,11 @@ impl Image {
     ///
     /// [`ImageType::Single1D`]: crate::enums::ImageType::Single1D
     pub fn new_1d(format: PixelFormatType, width: usize) -> Image {
+        let size = PixelFormatType::compute_size(&format, width);
+
         Image {
             dimensions: Vector3::new(width, 1, 1),
-            content: vec![vec![0u8; width]; 1],
+            content: vec![vec![0u8; size]; 1],
             image_type: ImageType::Single1D,
             pixel_format: format,
         }
@@ -65,9 +67,11 @@ impl Image {
     ///
     /// [`ImageType::Single2D`]: crate::enums::ImageType::Single2D
     pub fn new_2d(format: PixelFormatType, width: usize, height: usize) -> Image {
+        let size = PixelFormatType::compute_size(&format, width * height);
+
         Image {
             dimensions: Vector3::new(width, height, 1),
-            content: vec![vec![0u8; width * height]; 1],
+            content: vec![vec![0u8; size]; 1],
             image_type: ImageType::Single2D,
             pixel_format: format,
         }
@@ -95,9 +99,11 @@ impl Image {
     ///
     /// [`ImageType::Single3D`]: crate::enums::ImageType::Single3D
     pub fn new_3d(format: PixelFormatType, width: usize, height: usize, depth: usize) -> Image {
+        let size = PixelFormatType::compute_size(&format, width * height * depth);
+
         Image {
             dimensions: Vector3::new(width, height, depth),
-            content: vec![vec![0u8; width * height * depth]; 1],
+            content: vec![vec![0u8; size]; 1],
             image_type: ImageType::Single3D,
             pixel_format: format,
         }
