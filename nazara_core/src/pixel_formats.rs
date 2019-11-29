@@ -35,12 +35,12 @@ impl PixelFormatInfo {
 
 impl PixelFormatType {
     /// Returns how many bytes per pixel this format uses to store X pixels
-    pub fn compute_size(&self, pixel_count: usize) -> usize {
+    pub fn compute_size(self, pixel_count: usize) -> usize {
         (self.info().bits_per_pixel as usize * pixel_count + 7) / 8
     }
 
     /// Returns informations about a pixel format
-    pub fn info(&self) -> PixelFormatInfo {
+    pub fn info(self) -> PixelFormatInfo {
         // TODO make it static
         match self {
             PixelFormatType::RGB8 => PixelFormatInfo::new(
