@@ -39,8 +39,6 @@ impl Image {
     ///
     /// [`ImageType::Single1D`]: crate::enums::ImageType::Single1D
     pub fn new_1d(format: PixelFormatType, width: usize) -> Image {
-        let size = PixelFormatType::compute_size(format, width);
-
         Image {
             dimensions: Vector3::new(width, 1, 1),
             content: vec![vec![0u8; size]; 1],
