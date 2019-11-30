@@ -237,8 +237,4 @@ pub enum PixelFormatType {
     ///
     /// Stored in
     Stencil16,
-    /// idk what is it
-    ///
-    /// Stored in
-    Palette,
 }

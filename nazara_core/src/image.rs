@@ -1,6 +1,6 @@
 use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
-use image::{io::Reader, GenericImageView};
+use image::{io::Reader, GenericImageView, DynamicImage};
 use std::io::{BufRead, Seek};
 
 /// Image structure for Nazarust
@@ -249,14 +249,13 @@ impl ImageLoader {
         let image = reader.decode().expect("Fail");
         let dimensions = image.dimensions();
         let pixels = image.raw_pixels();
-        let color_type = match image.color() {
-            image::ColorType::Gray(_) => PixelFormatType::L8,
-            image::ColorType::GrayA(_) => PixelFormatType::A8,
-            image::ColorType::RGB(_) => PixelFormatType::RGB8,
-            image::ColorType::Palette(_) => PixelFormatType::Palette,
-            image::ColorType::RGBA(_) => PixelFormatType::RGBA8,
-            image::ColorType::BGR(_) => PixelFormatType::BGR8,
-            image::ColorType::BGRA(_) => PixelFormatType::BGRA8,
+        let color_type = match image {
+            DynamicImage::ImageLuma8(_) => {PixelFormatType::L8}
+            DynamicImage::ImageLumaA8(_) => {PixelFormatType::LA8}
+            DynamicImage::ImageRgb8(_) => {PixelFormatType::RGB8}
+            DynamicImage::ImageRgba8(_) => {PixelFormatType::RGBA8}
+            DynamicImage::ImageBgr8(_) => {PixelFormatType::BGR8}
+            DynamicImage::ImageBgra8(_) => {PixelFormatType::BGRA8}
         };
         Image {
             dimensions: Vector3 {
