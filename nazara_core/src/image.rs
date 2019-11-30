@@ -1,6 +1,6 @@
 use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
-use image::{flat::NormalForm::PixelPacked, io::Reader, GenericImageView};
+use image::{io::Reader, GenericImageView};
 use std::io::{BufRead, Seek};
 
 /// Image structure for Nazarust
