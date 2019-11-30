@@ -1,5 +1,9 @@
 use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
+use image::io::Reader;
+use image::GenericImageView;
+use image::flat::NormalForm::PixelPacked;
+use std::io::{BufRead, Seek};
 
 /// Image structure for Nazarust
 ///
@@ -64,6 +68,7 @@ impl Image {
     ///
     /// * `format` - Format for stored pixels
     /// * `width` - Width for the new image
+    /// * `height` - Height for new image
     ///
     /// [`ImageType::Single2D`]: crate::enums::ImageType::Single2D
     pub fn new_2d(format: PixelFormatType, width: usize, height: usize) -> Image {
@@ -96,6 +101,8 @@ impl Image {
     ///
     /// * `format` - Format for stored pixels
     /// * `width` - Width for the new image
+    /// * `height` - Height for the new image
+    /// * `depth` - Depth of new image
     ///
     /// [`ImageType::Single3D`]: crate::enums::ImageType::Single3D
     pub fn new_3d(format: PixelFormatType, width: usize, height: usize, depth: usize) -> Image {
@@ -174,5 +181,70 @@ impl Image {
     /// ```
     pub fn get_size(&self) -> Vector3<usize> {
         self.dimensions
+    }
+}
+
+/// Image loader for Nazarust
+///
+///
+pub struct ImageLoader {
+
+}
+
+impl ImageLoader {
+    /// Load an image from file
+    ///
+    ///
+    pub fn load_from_file(file: String) -> Image {
+        unimplemented!();
+    }
+
+    /// Load an image from memory
+    ///
+    ///
+    pub fn load_from_mem() -> Image {
+        unimplemented!();
+    }
+
+
+    /// Load an image from stream ([`std::io::Read`])
+    ///
+    /// ```
+    /// use std::fs::File;
+    /// use nazara_core::image::ImageLoader;
+    /// use std::io::BufReader;
+    /// let image = ImageLoader::load_from_reader(file!("./test_ressources/nazara_core/image.png"));
+    ///
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `reader` - Reader instance from which image will be loaded
+    pub fn load_from_reader<R: BufRead + Seek> (reader: R) -> Image {
+        let reader = Reader::new(reader)
+            .with_guessed_format()
+            .unwrap();
+
+        let image = reader.decode().expect("Fail");
+        let dimensions = image.dimensions();
+        let pixels = image.raw_pixels();
+        let color_type = match image.color() {
+            image::ColorType::Gray(_) => {PixelFormatType::L8}
+            image::ColorType::GrayA(_) => {PixelFormatType::A8}
+            image::ColorType::RGB(_) => {PixelFormatType::RGB8}
+            image::ColorType::Palette(_) => {PixelFormatType::Palette}
+            image::ColorType::RGBA(_) => {PixelFormatType::RGBA8}
+            image::ColorType::BGR(_) => {PixelFormatType::BGR8}
+            image::ColorType::BGRA(_) => {PixelFormatType::BGRA8}
+        };
+        Image {
+            dimensions: Vector3 {
+                x: dimensions.0 as usize,
+                y: dimensions.1 as usize,
+                z:1 },
+            content: vec![pixels,],
+            image_type: ImageType::Array2D,
+            pixel_format: color_type,
+        }
     }
 }
