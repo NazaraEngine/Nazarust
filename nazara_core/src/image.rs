@@ -1,8 +1,6 @@
 use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
-use image::io::Reader;
-use image::GenericImageView;
-use image::flat::NormalForm::PixelPacked;
+use image::{flat::NormalForm::PixelPacked, io::Reader, GenericImageView};
 use std::io::{BufRead, Seek};
 
 /// Image structure for Nazarust
@@ -39,6 +37,8 @@ impl Image {
     ///
     /// [`ImageType::Single1D`]: crate::enums::ImageType::Single1D
     pub fn new_1d(format: PixelFormatType, width: usize) -> Image {
+        let size = PixelFormatType::compute_size(format, width);
+
         Image {
             dimensions: Vector3::new(width, 1, 1),
             content: vec![vec![0u8; size]; 1],
@@ -185,9 +185,7 @@ impl Image {
 /// Image loader for Nazarust
 ///
 ///
-pub struct ImageLoader {
-
-}
+pub struct ImageLoader {}
 
 impl ImageLoader {
     /// Load an image from file
@@ -204,44 +202,70 @@ impl ImageLoader {
         unimplemented!();
     }
 
-
     /// Load an image from stream ([`std::io::Read`])
     ///
+    /// # Load a png image
     /// ```
     /// use std::fs::File;
-    /// use nazara_core::image::ImageLoader;
+    /// use nazara_core::image::{ImageLoader, Image};
     /// use std::io::BufReader;
-    /// let image = ImageLoader::load_from_reader(file!("./test_ressources/nazara_core/image.png"));
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
     ///
+    /// let file = File::open("./test_ressources/image.png").unwrap();
+    /// let buf = BufReader::new(file);
+    ///
+    /// let image: Image = ImageLoader::load_from_reader(buf);
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// ```
+    ///
+    /// # Load gif image
+    /// ```
+    /// use std::fs::File;
+    /// use nazara_core::image::{ImageLoader, Image};
+    /// use std::io::BufReader;
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    ///
+    /// let file = File::open("./test_ressources/image.gif").unwrap();
+    /// let buf = BufReader::new(file);
+    ///
+    /// let image: Image = ImageLoader::load_from_reader(buf);
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGBA8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
     /// ```
     ///
     /// # Arguments
     ///
     /// * `reader` - Reader instance from which image will be loaded
-    pub fn load_from_reader<R: BufRead + Seek> (reader: R) -> Image {
-        let reader = Reader::new(reader)
-            .with_guessed_format()
-            .unwrap();
+    pub fn load_from_reader<R: BufRead + Seek>(reader: R) -> Image {
+        let reader = Reader::new(reader).with_guessed_format().unwrap();
 
         let image = reader.decode().expect("Fail");
         let dimensions = image.dimensions();
         let pixels = image.raw_pixels();
         let color_type = match image.color() {
-            image::ColorType::Gray(_) => {PixelFormatType::L8}
-            image::ColorType::GrayA(_) => {PixelFormatType::A8}
-            image::ColorType::RGB(_) => {PixelFormatType::RGB8}
-            image::ColorType::Palette(_) => {PixelFormatType::Palette}
-            image::ColorType::RGBA(_) => {PixelFormatType::RGBA8}
-            image::ColorType::BGR(_) => {PixelFormatType::BGR8}
-            image::ColorType::BGRA(_) => {PixelFormatType::BGRA8}
+            image::ColorType::Gray(_) => PixelFormatType::L8,
+            image::ColorType::GrayA(_) => PixelFormatType::A8,
+            image::ColorType::RGB(_) => PixelFormatType::RGB8,
+            image::ColorType::Palette(_) => PixelFormatType::Palette,
+            image::ColorType::RGBA(_) => PixelFormatType::RGBA8,
+            image::ColorType::BGR(_) => PixelFormatType::BGR8,
+            image::ColorType::BGRA(_) => PixelFormatType::BGRA8,
         };
         Image {
             dimensions: Vector3 {
                 x: dimensions.0 as usize,
                 y: dimensions.1 as usize,
-                z:1 },
-            content: vec![pixels,],
-            image_type: ImageType::Array2D,
+                z: 1,
+            },
+            content: vec![pixels],
+            image_type: ImageType::Single2D,
             pixel_format: color_type,
         }
     }
