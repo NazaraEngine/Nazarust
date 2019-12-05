@@ -180,6 +180,10 @@ impl Image {
     pub fn get_size(&self) -> Vector3<usize> {
         self.dimensions
     }
+
+    pub fn set_content(&mut self, new_content: Vec<Vec>) {
+        self.content = new_content;
+    }
 }
 
 /// Image loader for Nazarust
@@ -257,15 +261,12 @@ impl ImageLoader {
             DynamicImage::ImageBgr8(_) => {PixelFormatType::BGR8}
             DynamicImage::ImageBgra8(_) => {PixelFormatType::BGRA8}
         };
-        Image {
-            dimensions: Vector3 {
-                x: dimensions.0 as usize,
-                y: dimensions.1 as usize,
-                z: 1,
-            },
-            content: vec![pixels],
-            image_type: ImageType::Single2D,
-            pixel_format: color_type,
-        }
+        let new_image = Image::new_2d(
+            color_type,
+            dimensions.0 as usize,
+            dimensions.1 as usize,
+        );
+        new_image.set_content(pixels);
+        new_image
     }
 }
