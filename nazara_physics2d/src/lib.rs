@@ -4,3 +4,4 @@ pub mod collider;
 
 extern crate nphysics2d;
 extern crate nalgebra;
+extern crate ncollide2d;
