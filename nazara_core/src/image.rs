@@ -1,4 +1,7 @@
-use crate::enums::{ImageType, PixelFormatType};
+use crate::{
+    enums::{ImageType, PixelFormatType},
+    errors::{ImageError, NazaraError, NazaraResult},
+};
 use cgmath::Vector3;
 use image::{io::Reader, DynamicImage, GenericImageView};
 use std::{
@@ -204,7 +207,7 @@ impl ImageLoader {
     /// use std::path::Path;
     /// use nazara_core::enums::{PixelFormatType, ImageType};
     /// use cgmath::Vector3;
-    /// let image: Image = ImageLoader::load_from_file(Path::new("./test_ressources/image.png"));
+    /// let image: Image = ImageLoader::load_from_file(Path::new("./test_ressources/image.png")).unwrap();
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
@@ -213,8 +216,9 @@ impl ImageLoader {
     ///
     /// # Arguments
     /// * `file` - [`std::path::Path`] of file to load
-    pub fn load_from_file(file: &Path) -> Image {
-        ImageLoader::load_from_reader(BufReader::new(File::open(file).unwrap()))
+    pub fn load_from_file(file: &Path) -> NazaraResult<Image> {
+        let file = File::open(file).map_err(|e| NazaraError::from(ImageError::from(e)))?;
+        ImageLoader::load_from_reader(BufReader::new(file))
     }
 
     /// Load an image from memory
@@ -225,7 +229,7 @@ impl ImageLoader {
     /// use nazara_core::image::{Image, ImageLoader};
     /// use nazara_core::enums::{PixelFormatType, ImageType};
     /// use cgmath::Vector3;
-    /// let image: Image = ImageLoader::load_from_mem(&fs::read("./test_ressources/image.png").unwrap());
+    /// let image: Image = ImageLoader::load_from_mem(&fs::read("./test_ressources/image.png").unwrap()).unwrap();
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
@@ -234,7 +238,7 @@ impl ImageLoader {
     ///
     /// # Arguments
     /// * `image` - Array of image content
-    pub fn load_from_mem(image: &[u8]) -> Image {
+    pub fn load_from_mem(image: &[u8]) -> NazaraResult<Image> {
         ImageLoader::load_from_reader(Cursor::new(image))
     }
 
@@ -251,7 +255,7 @@ impl ImageLoader {
     /// let file = File::open("./test_ressources/image.png").unwrap();
     /// let buf = BufReader::new(file);
     ///
-    /// let image: Image = ImageLoader::load_from_reader(buf);
+    /// let image: Image = ImageLoader::load_from_reader(buf).unwrap();
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
@@ -269,7 +273,7 @@ impl ImageLoader {
     /// let file = File::open("./test_ressources/image.gif").unwrap();
     /// let buf = BufReader::new(file);
     ///
-    /// let image: Image = ImageLoader::load_from_reader(buf);
+    /// let image: Image = ImageLoader::load_from_reader(buf).unwrap();
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGBA8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
@@ -279,10 +283,14 @@ impl ImageLoader {
     /// # Arguments
     ///
     /// * `reader` - Reader instance from which image will be loaded
-    pub fn load_from_reader<R: BufRead + Seek>(reader: R) -> Image {
-        let reader = Reader::new(reader).with_guessed_format().unwrap();
+    pub fn load_from_reader<R: BufRead + Seek>(reader: R) -> NazaraResult<Image> {
+        let reader = Reader::new(reader)
+            .with_guessed_format()
+            .map_err(|e| NazaraError::from(ImageError::from(e)))?;
 
-        let image = reader.decode().expect("Fail");
+        let image = reader
+            .decode()
+            .map_err(|e| NazaraError::from(ImageError::from(e)))?;
         let dimensions = image.dimensions();
         let pixels = vec![image.raw_pixels()];
         let color_type = match image {
@@ -295,6 +303,6 @@ impl ImageLoader {
         };
         let mut new_image = Image::new_2d(color_type, dimensions.0 as usize, dimensions.1 as usize);
         new_image.set_content(pixels);
-        new_image
+        Ok(new_image)
     }
 }

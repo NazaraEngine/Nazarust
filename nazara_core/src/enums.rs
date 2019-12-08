@@ -1,3 +1,5 @@
+use image::ColorType;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 /// Represents an image format
 pub enum ImageType {
@@ -237,4 +239,18 @@ pub enum PixelFormatType {
     ///
     /// Stored in
     Stencil16,
+}
+
+impl From<ColorType> for PixelFormatType {
+    fn from(c: ColorType) -> Self {
+        match c {
+            ColorType::BGR(_) => PixelFormatType::BGR8,
+            ColorType::Gray(_) => PixelFormatType::L8,
+            ColorType::RGB(_) => PixelFormatType::RGB8,
+            ColorType::Palette(_) => PixelFormatType::RGB8,
+            ColorType::GrayA(_) => PixelFormatType::LA8,
+            ColorType::RGBA(_) => PixelFormatType::RGBA8,
+            ColorType::BGRA(_) => PixelFormatType::BGRA8,
+        }
+    }
 }
