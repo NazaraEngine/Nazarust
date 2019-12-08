@@ -3,7 +3,8 @@ use cgmath::Vector3;
 use image::{io::Reader, DynamicImage, GenericImageView};
 use std::{
     fs,
-    io::{BufRead, Cursor, Seek},
+    fs::File,
+    io::{BufRead, BufReader, Cursor, Seek},
     path::Path,
 };
 
@@ -214,7 +215,7 @@ impl ImageLoader {
     /// # Arguments
     /// * `file` - [`std::path::Path`] of file to load
     pub fn load_from_file(file: &Path) -> Image {
-        ImageLoader::load_from_mem(&fs::read(file).unwrap())
+        ImageLoader::load_from_reader(BufReader::new(File::open(file).unwrap()))
     }
 
     /// Load an image from memory
