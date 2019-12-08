@@ -1,0 +1,10 @@
+[package]
+name = "nazara_platform"
+version = "0.1.0"
+authors = ["abdel"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+winit = "0.20.0-alpha4"
