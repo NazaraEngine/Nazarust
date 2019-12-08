@@ -1,5 +1,6 @@
-use crate::enums::PixelFormatType;
 use std::{error::Error, fmt, io};
+
+use crate::enums::PixelFormatType;
 
 pub type NazaraResult<T> = Result<T, NazaraError>;
 

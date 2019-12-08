@@ -1,13 +1,15 @@
-use crate::{
-    enums::{ImageType, PixelFormatType},
-    errors::{ImageError, NazaraError, NazaraResult},
-};
-use cgmath::Vector3;
-use image::{io::Reader, DynamicImage, GenericImageView};
 use std::{
     fs::File,
     io::{BufRead, BufReader, Cursor, Seek},
     path::Path,
+};
+
+use cgmath::Vector3;
+use image::{io::Reader, DynamicImage, GenericImageView};
+
+use crate::{
+    enums::{ImageType, PixelFormatType},
+    errors::{ImageError, NazaraError, NazaraResult},
 };
 
 /// Image structure for Nazarust
