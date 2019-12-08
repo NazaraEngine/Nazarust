@@ -2,7 +2,6 @@ use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
 use image::{io::Reader, DynamicImage, GenericImageView};
 use std::{
-    fs,
     fs::File,
     io::{BufRead, BufReader, Cursor, Seek},
     path::Path,
