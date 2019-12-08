@@ -1,7 +1,11 @@
 use crate::enums::{ImageType, PixelFormatType};
 use cgmath::Vector3;
-use image::{io::Reader, GenericImageView, DynamicImage};
-use std::io::{BufRead, Seek};
+use image::{io::Reader, DynamicImage, GenericImageView};
+use std::{
+    fs,
+    io::{BufRead, Cursor, Seek},
+    path::Path,
+};
 
 /// Image structure for Nazarust
 ///
@@ -181,7 +185,7 @@ impl Image {
         self.dimensions
     }
 
-    pub fn set_content(&mut self, new_content: Vec<Vec>) {
+    pub fn set_content(&mut self, new_content: Vec<Vec<u8>>) {
         self.content = new_content;
     }
 }
@@ -194,19 +198,47 @@ pub struct ImageLoader {}
 impl ImageLoader {
     /// Load an image from file
     ///
+    /// # Example
+    /// ```
+    /// use nazara_core::image::{ImageLoader, Image};
+    /// use std::path::Path;
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    /// let image: Image = ImageLoader::load_from_file(Path::new("./test_ressources/image.png"));
     ///
-    pub fn load_from_file(file: String) -> Image {
-        unimplemented!();
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y: 629, z:1 });
+    /// ```
+    ///
+    /// # Arguments
+    /// * `file` - [`std::path::Path`] of file to load
+    pub fn load_from_file(file: &Path) -> Image {
+        ImageLoader::load_from_mem(&fs::read(file).unwrap())
     }
 
     /// Load an image from memory
     ///
+    /// # Example
+    /// ```
+    /// use std::fs;
+    /// use nazara_core::image::{Image, ImageLoader};
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    /// let image: Image = ImageLoader::load_from_mem(&fs::read("./test_ressources/image.png").unwrap());
     ///
-    pub fn load_from_mem() -> Image {
-        unimplemented!();
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// ```
+    ///
+    /// # Arguments
+    /// * `image` - Array of image content
+    pub fn load_from_mem(image: &[u8]) -> Image {
+        ImageLoader::load_from_reader(Cursor::new(image))
     }
 
-    /// Load an image from stream ([`std::io::Read`])
+    /// Load an image from stream ([`std::io::BufRead`], [`std::io::Seek`])
     ///
     /// # Load a png image
     /// ```
@@ -252,20 +284,16 @@ impl ImageLoader {
 
         let image = reader.decode().expect("Fail");
         let dimensions = image.dimensions();
-        let pixels = image.raw_pixels();
+        let pixels = vec![image.raw_pixels()];
         let color_type = match image {
-            DynamicImage::ImageLuma8(_) => {PixelFormatType::L8}
-            DynamicImage::ImageLumaA8(_) => {PixelFormatType::LA8}
-            DynamicImage::ImageRgb8(_) => {PixelFormatType::RGB8}
-            DynamicImage::ImageRgba8(_) => {PixelFormatType::RGBA8}
-            DynamicImage::ImageBgr8(_) => {PixelFormatType::BGR8}
-            DynamicImage::ImageBgra8(_) => {PixelFormatType::BGRA8}
+            DynamicImage::ImageLuma8(_) => PixelFormatType::L8,
+            DynamicImage::ImageLumaA8(_) => PixelFormatType::LA8,
+            DynamicImage::ImageRgb8(_) => PixelFormatType::RGB8,
+            DynamicImage::ImageRgba8(_) => PixelFormatType::RGBA8,
+            DynamicImage::ImageBgr8(_) => PixelFormatType::BGR8,
+            DynamicImage::ImageBgra8(_) => PixelFormatType::BGRA8,
         };
-        let new_image = Image::new_2d(
-            color_type,
-            dimensions.0 as usize,
-            dimensions.1 as usize,
-        );
+        let mut new_image = Image::new_2d(color_type, dimensions.0 as usize, dimensions.1 as usize);
         new_image.set_content(pixels);
         new_image
     }
