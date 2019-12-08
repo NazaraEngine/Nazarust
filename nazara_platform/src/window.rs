@@ -1,6 +1,6 @@
 use winit::{
     dpi::LogicalSize,
-    event::{Event, WindowEvent, VirtualKeyCode, ElementState, KeyboardInput},
+    event::{Event as WinitEvent, WindowEvent, VirtualKeyCode, ElementState, KeyboardInput},
     event_loop::{ControlFlow, EventLoop},
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
@@ -30,12 +30,11 @@ impl<'a> Window<'a> {
             resizable,
         }
     }
-    pub fn run_loop(mut self, event_loop: EventLoop<()>) {
+    pub fn run_loop(mut self) {
 
-        event_loop.run(move |event, _, control_flow| {
-
+        self.event_loop.run(move |event, _, control_flow| {
             match event {
-                 Event::WindowEvent { event, .. } => {
+                 WinitEvent::WindowEvent { event, .. } => {
                     match event {
                          WindowEvent::CloseRequested => {
                             *control_flow = ControlFlow::Exit
