@@ -9,7 +9,7 @@ pub struct PhysWorld<T: RealField>
     mechanical_world: DefaultMechanicalWorld<T>,
     geometric_world: DefaultGeometricalWorld<T>,
     pub(crate) body_set: DefaultBodySet<T>,
-    collider_set: DefaultColliderSet<T>,
+    pub(crate) collider_set: DefaultColliderSet<T>,
     joint_set: DefaultJointConstraintSet<T>,
     force_generator_set: DefaultForceGeneratorSet<T>,
 }
