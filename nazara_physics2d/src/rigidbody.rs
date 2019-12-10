@@ -1,22 +1,26 @@
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
 use nalgebra::{Vector2, Point2, RealField};
-use nphysics2d::object::{RigidBodyDesc, ColliderDesc, DefaultBodyHandle, BodyPartHandle, DefaultColliderHandle};
+use nphysics2d::object::{RigidBodyDesc, ColliderDesc, DefaultBodyHandle, BodyPartHandle, DefaultColliderHandle, DefaultBodySet};
 use nphysics2d::object;
 use nphysics2d::math::{Velocity, Inertia};
 
 use crate::physworld::PhysWorld;
 use crate::collider::Collider;
 
-pub struct RigidBody<'a, T: RealField>
+pub struct RigidBody<T: RealField>
 {
-    body: &'a mut object::RigidBody<T>,
+    body: DefaultBodyHandle,
+    body_set: Weak<RefCell<DefaultBodySet<T>>>,
     //collider_handles: Vec<DefaultColliderHandle>,
 }
 
-impl<'a, T: RealField> RigidBody<'a, T>
+impl<T: RealField> RigidBody<T>
 {
-    pub fn new(world: &'a mut PhysWorld<T>, mass: T, collider: Option<&Collider<T>>) -> Self
+    pub fn new(world: &mut PhysWorld<T>, mass: T, collider: Option<&Collider<T>>) -> Self
     {
-        let handle = world.body_set.insert(RigidBodyDesc::new().mass(mass).build());
+        let handle = world.body_set.borrow_mut().insert(RigidBodyDesc::new().mass(mass).build());
 
         if let Some(c) = collider
         {
@@ -25,7 +29,8 @@ impl<'a, T: RealField> RigidBody<'a, T>
 
         RigidBody
         {
-            body: world.body_set.rigid_body_mut(handle).unwrap(),
+            body: handle,
+            body_set: Rc::downgrade(&world.body_set),
             /*collider_handles: 
                 match collider
                 {
@@ -37,7 +42,7 @@ impl<'a, T: RealField> RigidBody<'a, T>
 
     pub fn get_position(&self) -> Vector2<T>
     {
-        self.body.position().translation.vector
+        self.body_set.upgrade().unwrap().borrow().rigid_body(self.body).unwrap().position().translation.vector
     }
 
     /*pub fn add_collider(&mut self, collider: &Collider<T>)
