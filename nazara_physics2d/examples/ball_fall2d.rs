@@ -6,7 +6,6 @@ use std::time::Instant;
 
 use nazara_physics2d::physworld::PhysWorld;
 use nazara_physics2d::rigidbody::RigidBody;
-use nazara_physics2d::rigidbody::RigidBodyStatus;
 use nazara_physics2d::collider::Collider;
 use nazara_physics2d::material::Material;
 

@@ -1,10 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::convert::From;
 
-use nalgebra::{Vector2, RealField};
+use nalgebra::Vector2;
 use nphysics2d::object::{DefaultBodySet, DefaultColliderSet};
-use nphysics2d::object::{RigidBodyDesc, ColliderDesc, DefaultBodyHandle, BodyPartHandle, DefaultColliderHandle};
 use nphysics2d::force_generator::DefaultForceGeneratorSet;
 use nphysics2d::joint::DefaultJointConstraintSet;
 use nphysics2d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};

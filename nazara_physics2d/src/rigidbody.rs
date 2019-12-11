@@ -1,10 +1,8 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use nalgebra::{Vector2, Point2};
-use nphysics2d::object::{RigidBodyDesc, BodyStatus, DefaultBodyHandle, BodyPartHandle, DefaultColliderHandle, DefaultBodySet};
-use nphysics2d::object;
-use nphysics2d::math::{Velocity, Inertia};
+use nalgebra::Vector2;
+use nphysics2d::object::{RigidBodyDesc, BodyStatus, DefaultBodyHandle, BodyPartHandle, DefaultBodySet};
 
 use crate::physworld::PhysWorld;
 use crate::collider::Collider;

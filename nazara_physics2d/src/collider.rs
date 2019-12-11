@@ -1,6 +1,4 @@
-use std::convert::From;
-
-use nalgebra::{RealField, Vector2};
+use nalgebra::Vector2;
 use nalgebra::geometry::Point2;
 use nphysics2d::object::ColliderDesc;
 use nphysics2d::material::MaterialHandle;
