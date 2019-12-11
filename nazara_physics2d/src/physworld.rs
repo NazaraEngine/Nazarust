@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::convert::From;
 
 use nalgebra::{Vector2, RealField};
 use nphysics2d::object::{DefaultBodySet, DefaultColliderSet};
@@ -8,9 +9,9 @@ use nphysics2d::force_generator::DefaultForceGeneratorSet;
 use nphysics2d::joint::DefaultJointConstraintSet;
 use nphysics2d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};
 
-use crate::rigidbody::RigidBody;
+use crate::Number;
 
-pub struct PhysWorld<T: RealField>
+pub struct PhysWorld<T: Number>
 {
     mechanical_world: DefaultMechanicalWorld<T>,
     geometric_world: DefaultGeometricalWorld<T>,
@@ -20,7 +21,7 @@ pub struct PhysWorld<T: RealField>
     force_generator_set: DefaultForceGeneratorSet<T>,
 }
 
-impl<T: RealField> PhysWorld<T>
+impl<T: Number> PhysWorld<T>
 {
     pub fn new(gravity: Vector2<T>) -> PhysWorld<T>
     {

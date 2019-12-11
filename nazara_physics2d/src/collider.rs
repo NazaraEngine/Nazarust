@@ -1,9 +1,13 @@
+use std::convert::From;
+
 use nalgebra::{RealField, Vector2};
 use nalgebra::geometry::Point2;
 use nphysics2d::object::ColliderDesc;
 use ncollide2d::shape;
 
-pub enum Collider<T: RealField>
+use crate::Number;
+
+pub enum Collider<T: Number>
 {
     Box{ size: Vector2<T>, offset: Option<Point2<T>> },
     Circle{ radius: T, offset: Option<Point2<T>> },
@@ -13,7 +17,7 @@ pub enum Collider<T: RealField>
     //Triangle(first_point: Point2<T>, second_point: Point2<T>, third_point: Point2<T>), because shape::Triangle doesn't impl shape trait for no reason
 }
 
-impl<T: RealField> Collider<T>
+impl<T: Number> Collider<T>
 {
     pub(crate) fn create_desc(&self) -> ColliderDesc<T>
     {
@@ -21,7 +25,7 @@ impl<T: RealField> Collider<T>
         {
             &Collider::Box{ size, offset } =>
             {
-                let mut desc = ColliderDesc::new(shape::ShapeHandle::new(shape::Cuboid::new(size.scale(T::two_pi()/T::pi())))); // *2 because Cuboid expect half size
+                let mut desc = ColliderDesc::new(shape::ShapeHandle::new(shape::Cuboid::new(size.unscale((2.0).into())))); // /2 because Cuboid expect half size
                 if let Some(offset) = offset
                 {
                     desc.set_translation(offset.coords);
