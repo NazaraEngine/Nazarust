@@ -5,4 +5,5 @@ members = [
     "nazara_core",
     "nazara_gfx",
     "nazara_net",
+    "nazara_platform"
 ]
