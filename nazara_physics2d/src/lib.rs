@@ -1,6 +1,7 @@
 pub mod rigidbody;
 pub mod physworld;
 pub mod collider;
+pub mod material;
 
 extern crate nphysics2d;
 extern crate nalgebra;

@@ -8,6 +8,7 @@ use nphysics2d::math::{Velocity, Inertia};
 
 use crate::physworld::PhysWorld;
 use crate::collider::Collider;
+use crate::material::Material;
 use crate::Number;
 
 pub enum RigidBodyStatus
@@ -24,20 +25,29 @@ pub struct RigidBody<T: Number>
 
 impl<T: Number> RigidBody<T>
 {
-    pub fn new(world: &mut PhysWorld<T>, mass: T, status: RigidBodyStatus, collider: Option<&Collider<T>>) -> Self
+    pub fn new(world: &mut PhysWorld<T>, mass: T, collider: Option<&Collider<T>>, material: Option<&Material<T>>) -> Self // Material and Collider are linked if collider is None Material won't be used
     {
-        let mut desc = RigidBodyDesc::new().mass(mass);
-
-        if let RigidBodyStatus::Static = status
-        {
-            desc.set_status(BodyStatus::Static);
-        }
-
-        let handle = world.body_set.borrow_mut().insert(desc.build());
+        let handle = world.body_set.borrow_mut().insert(RigidBodyDesc::new().mass(mass).build());
 
         if let Some(c) = collider
         {
-            world.collider_set.insert(c.create_desc().build(BodyPartHandle(handle, 0)));
+            world.collider_set.insert(c.create_desc(material).build(BodyPartHandle(handle, 0))); // if Material::density is not None and not zero mass and angular-inertia will be overriden
+        }
+
+        RigidBody
+        {
+            body: handle,
+            body_set: Rc::downgrade(&world.body_set),
+        }
+    }
+
+    pub fn new_static(world: &mut PhysWorld<T>, collider: Option<&Collider<T>>, material: Option<&Material<T>>) -> Self
+    {
+        let handle = world.body_set.borrow_mut().insert(RigidBodyDesc::new().status(BodyStatus::Static).build());
+
+        if let Some(c) = collider
+        {
+            world.collider_set.insert(c.create_desc(material).build(BodyPartHandle(handle, 0)));
         }
 
         RigidBody

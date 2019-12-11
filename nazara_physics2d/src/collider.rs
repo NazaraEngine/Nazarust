@@ -3,8 +3,10 @@ use std::convert::From;
 use nalgebra::{RealField, Vector2};
 use nalgebra::geometry::Point2;
 use nphysics2d::object::ColliderDesc;
+use nphysics2d::material::MaterialHandle;
 use ncollide2d::shape;
 
+use crate::material::Material;
 use crate::Number;
 
 pub enum Collider<T: Number>
@@ -19,9 +21,9 @@ pub enum Collider<T: Number>
 
 impl<T: Number> Collider<T>
 {
-    pub(crate) fn create_desc(&self) -> ColliderDesc<T>
+    pub(crate) fn create_desc(&self, material: Option<&Material<T>>) -> ColliderDesc<T>
     {
-        match self
+        let mut description = match self
         {
             &Collider::Box{ size, offset } =>
             {
@@ -48,6 +50,15 @@ impl<T: Number> Collider<T>
                 ColliderDesc::new(shape::ShapeHandle::new(shape::Segment::new(first_point, second_point))),
             //&Triangle(first_point, second_point, third_point) =>
             //    ColliderDesc::new(shape::ShapeHandle::new(shape::Triangle::new(first_point, second_point, third_point))),
+        };
+        if let Some(material) = material
+        {
+            if let Some(density) = material.density
+            {
+                description.set_density(density);
+            }
+            description.set_material(MaterialHandle::new(material.material));
         }
+        description
     }
 }
