@@ -4,13 +4,15 @@ use winit::{
 	event_loop::{ControlFlow, EventLoop},
 	window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Window {
 	window: Option<WinitWindow>,
 	window_builder: WinitWindowBuilder,
 	name: String,
 	resizable: bool,
-	callback: Box<dyn FnMut()>
+	callback: Rc<RefCell<dyn FnMut()>>
 }
 
 impl Window {
@@ -21,7 +23,7 @@ impl Window {
 				height: size.0 as f64,
 				width: size.1 as f64,
 			});
-		let callback = Box::new(move ||());
+		let callback = Rc::new(RefCell::new(move ||()));
 		Self {
 			window: None,
 			window_builder,
@@ -32,7 +34,8 @@ impl Window {
 	}
 	pub fn run_loop(&mut self) {
 		let event_loop = EventLoop::new();
-		self.window = Some(self.window_builder.build(&event_loop).unwrap());
+		self.window = Some(self.window_builder.clone().build(&event_loop).unwrap());
+		let callback = Rc::clone(&self.callback);
 		event_loop.run(move |event, _, control_flow| {
 			match event {
 				 WinitEvent::WindowEvent { event, .. } => {
@@ -45,7 +48,7 @@ impl Window {
 								 KeyboardInput { virtual_keycode, state, .. } => {
 									match (virtual_keycode, state) {
 										 (Some(VirtualKeyCode::A), ElementState::Pressed) => {
-											(*self.callback)();
+											(callback.borrow_mut())();
 										},
 										 _ => {},
 									}
@@ -60,11 +63,12 @@ impl Window {
 
 		})
 	}
-	pub fn change_lambda<T: 'static + FnMut()>(&mut self, lambda: T) {
-        self.callback = Box::new(lambda);
+	pub fn change_lambda(&mut self, lambda: Box<dyn FnMut()>) {
+        self.callback = Rc::new(RefCell::new(lambda));
     }
 }
 
+#[derive(Clone)]
 pub struct WindowBuilder<'b> {
 	name: &'b str,
 	size: (u32, u32),
