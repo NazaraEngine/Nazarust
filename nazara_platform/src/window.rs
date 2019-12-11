@@ -6,7 +6,6 @@ use winit::{
 };
 use std::rc::Rc;
 use std::cell::RefCell;
-
 pub struct Window {
 	window: Option<WinitWindow>,
 	window_builder: WinitWindowBuilder,
@@ -89,5 +88,38 @@ impl<'b> WindowBuilder<'b> {
 	}
 	pub fn build_with(&self, name: &'b str, size: (u32, u32)) -> Window {
 			Window::new(name.to_string(), size, self.resizable)
+	}
+}
+
+use crate::events::{KeyEvent, MouseEvent, State, WindowEvent as NazarustWindowEvent};
+
+trait NazarustEvent{}
+impl NazarustEvent for KeyEvent{}
+impl NazarustEvent for MouseEvent{}
+
+fn from_winit_event<K>(winit_event: WinitEvent<K>) -> impl NazarustEvent{
+	let a = match winit_event {
+		WinitEvent::WindowEvent { event, .. } => {
+			match event  {
+				WindowEvent::Resized(_) => NazarustWindowEvent::Resized,
+				WindowEvent::Moved(_) => NazarustWindowEvent::Moved,
+				WindowEvent::CloseRequested => NazarustWindowEvent::CloseRequested,
+				WindowEvent::KeyboardInput { input, .. } => {
+					match input {
+						KeyboardInput { virtual_keycode, state, .. } => {
+							match virtual_keycode{
+								_ => KeyEvent::A{
+									state: State::Pressed,
+								},
+							}
+						}
+					}
+				}
+			}
+		},
+		_ => NazarustWindowEvent::Resized,
+	};
+	KeyEvent::A{
+		state: State::Pressed,
 	}
 }

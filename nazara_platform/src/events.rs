@@ -9,7 +9,11 @@ pub enum MouseButton {
     Middle,
     Other(u8),
 }
-
+pub enum WindowEvent{
+	Resized,
+	Moved,
+	CloseRequested,
+}
 pub enum MouseEvent{
 	Moved,
 	Button{
@@ -503,3 +507,4 @@ pub enum KeyEvent {
     	state: State
     },
 }
+
