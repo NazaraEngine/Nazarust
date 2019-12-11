@@ -48,7 +48,7 @@ impl Window {
 								 KeyboardInput { virtual_keycode, state, .. } => {
 									match (virtual_keycode, state) {
 										 (Some(VirtualKeyCode::A), ElementState::Pressed) => {
-											(callback.borrow_mut())();
+											(&mut *callback.borrow_mut())();
 										},
 										 _ => {},
 									}
@@ -63,7 +63,7 @@ impl Window {
 
 		})
 	}
-	pub fn change_lambda(&mut self, lambda: Box<dyn FnMut()>) {
+	pub fn set_callback(&mut self, lambda: Box<dyn FnMut()>) {
         self.callback = Rc::new(RefCell::new(lambda));
     }
 }
