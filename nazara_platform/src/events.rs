@@ -1,19 +1,22 @@
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum State {
     Pressed,
     Released,
 }
-
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MouseButton {
     Left,
     Right,
     Middle,
     Other(u8),
 }
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WindowEvent {
     Resized,
     Moved,
     CloseRequested,
 }
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MouseEvent {
     Moved,
     Button {
@@ -22,6 +25,8 @@ pub enum MouseEvent {
     },
     Scroll,
 }
+// https://docs.rs/winit/0.20.0-alpha5/winit/event/enum.VirtualKeyCode.html
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum KeyEvent {
     Key1 { state: State },
     Key2 { state: State },
@@ -85,7 +90,8 @@ pub enum KeyEvent {
     F23 { state: State },
     F24 { state: State },
     Snapshot { state: State },
-    Scroll { state: State },
+    // Equivalent to Scroll variant in winit
+    ScrollLock { state: State },
     Pause { state: State },
     Insert { state: State },
     Home { state: State },
@@ -98,7 +104,8 @@ pub enum KeyEvent {
     Right { state: State },
     Down { state: State },
     Back { state: State },
-    Return { state: State },
+    // Equivalent to Return variant in winit
+    Enter { state: State },
     Space { state: State },
     Compose { state: State },
     Caret { state: State },

@@ -99,31 +99,3 @@ enum NazarustEvents {
     WindowEvent(NazarustWindowEvent),
     Unknown,
 }
-fn from_winit_event<K>(winit_event: WinitEvent<K>) -> NazarustEvents {
-    let nazarust_event = match winit_event {
-        WinitEvent::WindowEvent { event, .. } => match event {
-            WindowEvent::Resized(_) => NazarustEvents::WindowEvent(NazarustWindowEvent::Resized),
-            WindowEvent::Moved(_) => NazarustEvents::WindowEvent(NazarustWindowEvent::Moved),
-            WindowEvent::CloseRequested => {
-                NazarustEvents::WindowEvent(NazarustWindowEvent::CloseRequested)
-            }
-            WindowEvent::KeyboardInput { input, .. } => match input {
-                KeyboardInput {
-                    virtual_keycode,
-                    state,
-                    ..
-                } => match (virtual_keycode, state) {
-                    (Some(VirtualKeyCode::A), ElementState::Pressed) => {
-                        NazarustEvents::KeyEvent(KeyEvent::A {
-                            state: State::Pressed,
-                        })
-                    }
-                    _ => NazarustEvents::Unknown,
-                },
-            },
-            _ => NazarustEvents::Unknown,
-        },
-        _ => NazarustEvents::Unknown,
-    };
-    nazarust_event
-}
