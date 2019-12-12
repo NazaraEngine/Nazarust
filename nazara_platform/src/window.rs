@@ -1,4 +1,4 @@
-use crate::winit_utility::from_winit_event;
+use crate::winit_utility::{NazarustEvent, from_winit_event};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use std::hash::Hash;
 use winit::{
@@ -8,14 +8,21 @@ use winit::{
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
 
+use crate::events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent};
+
 pub struct Window<T: NazarustEvent> {
     window: Option<WinitWindow>,
     window_builder: WinitWindowBuilder,
     name: String,
     resizable: bool,
-    callback: HashMap<T, Rc<RefCell<dyn FnMut()>>>,
+    callbacks: HashMap<SimpleNazarustEvents<T>, Box<dyn FnMut()>>,
 }
-
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum SimpleNazarustEvents<T: NazarustEvent>{
+	KeyEvent(T),
+	WindowEvent(T),
+	MouseEvent(T)
+}
 impl<T: NazarustEvent> Window<T> {
     fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
         let window_builder =
@@ -25,13 +32,13 @@ impl<T: NazarustEvent> Window<T> {
                     height: size.0 as f64,
                     width: size.1 as f64,
                 });
-        let callback = HashMap::new();
+        let callbacks = HashMap::new();
         Self {
             window: None,
             window_builder,
             name,
             resizable,
-            callback,
+            callbacks,
         }
     }
     pub fn run_loop(&mut self) {
@@ -39,10 +46,13 @@ impl<T: NazarustEvent> Window<T> {
         self.window = Some(self.window_builder.clone().build(&event_loop).unwrap());
         //let callback = Rc::clone(&self.callback);
         event_loop.run(move |event, _, control_flow| {
-            //(&mut *callback[from_winit_event(event)].borrow_mut())();
+        	let mut nazarust_event = from_winit_event(event);
+        	//nazarust_event = 
+            //(&mut *self.callbacks[nazarust_event].borrow_mut())();
         })
     }
-    pub fn set_callback(&mut self, event: T, lambda: Box<dyn FnMut()>) {}
+    pub fn set_callback<K: NazarustEvent>(&mut self, event: K, lambda: Box<dyn FnMut()>) {
+    }
 }
 
 #[derive(Clone)]
@@ -69,15 +79,5 @@ impl<'b> WindowBuilder<'b> {
     }
 }
 
-use crate::events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent};
 
-pub trait NazarustEvent: Eq + Hash {}
-impl NazarustEvent for KeyEvent {}
-impl NazarustEvent for MouseEvent {}
 
-enum NazarustEvents {
-    KeyEvent(KeyEvent),
-    MouseEvent(MouseEvent),
-    WindowEvent(NazarustWindowEvent),
-    Unknown,
-}

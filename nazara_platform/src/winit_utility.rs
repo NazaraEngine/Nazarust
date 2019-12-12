@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use crate::events::{
     KeyEvent, MouseButton as NazarustMouseButton, MouseEvent, State,
     WindowEvent as NazarustWindowEvent,
@@ -7,10 +8,24 @@ use winit::event::{
     MouseButton as WinitMouseButton, VirtualKeyCode, WindowEvent,
 };
 
-trait NazarustEvent {}
-impl NazarustEvent for KeyEvent {}
-impl NazarustEvent for MouseEvent {}
-impl NazarustEvent for NazarustWindowEvent {}
+pub trait NazarustEvent: Eq + Hash {
+    fn name(&self) -> String;
+}
+impl NazarustEvent for KeyEvent {
+    fn name(&self) -> String{
+        String::from("KeyEvent")
+    }
+}
+impl NazarustEvent for MouseEvent {
+    fn name(&self) -> String{
+        String::from("MouseEvent")
+    }
+}
+impl NazarustEvent for NazarustWindowEvent {
+    fn name(&self) -> String{
+        String::from("WindowEvent")
+    }
+}
 
 pub enum NazarustEvents {
     KeyEvent(KeyEvent, NazarustModifiersState),
@@ -18,6 +33,19 @@ pub enum NazarustEvents {
     WindowEvent(NazarustWindowEvent),
     Unknown,
 }
+/*pub fn nazarustevents_to_event(nazarust_event: NazarustEvents) -> Option<impl NazarustEvent>{
+    if let NazarustEvents::KeyEvent(key_event, _) = nazarust_event{
+       return  Some(key_event)
+    };
+    if let NazarustEvents::MouseEvent(mouse_event, _) = nazarust_event {
+        return Some(mouse_event)
+    };
+    if let NazarustEvents::WindowEvent(window_event) = nazarust_event {
+        return Some(window_event)
+    } else {
+        return None
+    }
+}*/
 fn winit_to_nazarust_modifiers(modifiers: WinitModifiersState) -> NazarustModifiersState {
     NazarustModifiersState {
         shift: modifiers.shift,
