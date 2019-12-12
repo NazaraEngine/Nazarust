@@ -1,19 +1,22 @@
-use std::{cell::RefCell, rc::Rc};
+use crate::winit_utility::from_winit_event;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::hash::Hash;
 use winit::{
     dpi::LogicalSize,
     event::{ElementState, Event as WinitEvent, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
-pub struct Window {
+
+pub struct Window<T: NazarustEvent> {
     window: Option<WinitWindow>,
     window_builder: WinitWindowBuilder,
     name: String,
     resizable: bool,
-    callback: Rc<RefCell<dyn FnMut()>>,
+    callback: HashMap<T, Rc<RefCell<dyn FnMut()>>>,
 }
 
-impl Window {
+impl<T: NazarustEvent> Window<T> {
     fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
         let window_builder =
             WinitWindowBuilder::new()
@@ -22,7 +25,7 @@ impl Window {
                     height: size.0 as f64,
                     width: size.1 as f64,
                 });
-        let callback = Rc::new(RefCell::new(move || ()));
+        let callback = HashMap::new();
         Self {
             window: None,
             window_builder,
@@ -34,30 +37,12 @@ impl Window {
     pub fn run_loop(&mut self) {
         let event_loop = EventLoop::new();
         self.window = Some(self.window_builder.clone().build(&event_loop).unwrap());
-        let callback = Rc::clone(&self.callback);
-        event_loop.run(move |event, _, control_flow| match event {
-            WinitEvent::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                WindowEvent::KeyboardInput { input, .. } => match input {
-                    KeyboardInput {
-                        virtual_keycode,
-                        state,
-                        ..
-                    } => match (virtual_keycode, state) {
-                        (Some(VirtualKeyCode::A), ElementState::Pressed) => {
-                            (&mut *callback.borrow_mut())();
-                        }
-                        _ => {}
-                    },
-                },
-                _ => {}
-            },
-            _ => (),
+        //let callback = Rc::clone(&self.callback);
+        event_loop.run(move |event, _, control_flow| {
+            //(&mut *callback[from_winit_event(event)].borrow_mut())();
         })
     }
-    pub fn set_callback(&mut self, lambda: Box<dyn FnMut()>) {
-        self.callback = Rc::new(RefCell::new(lambda));
-    }
+    pub fn set_callback(&mut self, event: T, lambda: Box<dyn FnMut()>) {}
 }
 
 #[derive(Clone)]
@@ -79,19 +64,16 @@ impl<'b> WindowBuilder<'b> {
         self.resizable = true;
         self
     }
-    pub fn build_with(&self, name: &'b str, size: (u32, u32)) -> Window {
+    pub fn build_with<T: NazarustEvent>(&self, name: &'b str, size: (u32, u32)) -> Window<T> {
         Window::new(name.to_string(), size, self.resizable)
     }
 }
 
-use crate::events::{KeyEvent, MouseEvent, State, WindowEvent as NazarustWindowEvent};
+use crate::events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent};
 
-trait NazarustEvent {}
+pub trait NazarustEvent: Eq + Hash {}
 impl NazarustEvent for KeyEvent {}
 impl NazarustEvent for MouseEvent {}
-
-// I'll probably remove the Unkown variant, it's here because i need a default value,
-// or i get errors because of non-exhaustive patterns , and i can't debug in peace
 
 enum NazarustEvents {
     KeyEvent(KeyEvent),
