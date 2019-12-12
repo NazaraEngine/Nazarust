@@ -1,31 +1,17 @@
-use std::hash::Hash;
 use crate::events::{
     KeyEvent, MouseButton as NazarustMouseButton, MouseEvent, State,
     WindowEvent as NazarustWindowEvent,
 };
+use std::hash::Hash;
 use winit::event::{
     ElementState, Event as WinitEvent, KeyboardInput, ModifiersState as WinitModifiersState,
     MouseButton as WinitMouseButton, VirtualKeyCode, WindowEvent,
 };
 
-pub trait NazarustEvent: Eq + Hash {
-    fn name(&self) -> String;
-}
-impl NazarustEvent for KeyEvent {
-    fn name(&self) -> String{
-        String::from("KeyEvent")
-    }
-}
-impl NazarustEvent for MouseEvent {
-    fn name(&self) -> String{
-        String::from("MouseEvent")
-    }
-}
-impl NazarustEvent for NazarustWindowEvent {
-    fn name(&self) -> String{
-        String::from("WindowEvent")
-    }
-}
+pub trait NazarustEvent: Eq + Hash {}
+impl NazarustEvent for KeyEvent {}
+impl NazarustEvent for MouseEvent {}
+impl NazarustEvent for NazarustWindowEvent {}
 
 pub enum NazarustEvents {
     KeyEvent(KeyEvent, NazarustModifiersState),
