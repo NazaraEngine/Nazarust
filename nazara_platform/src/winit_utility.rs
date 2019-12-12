@@ -7,9 +7,6 @@ use winit::event::{
     VirtualKeyCode, WindowEvent,
 };
 
-trait NazarustEvent {}
-impl NazarustEvent for KeyEvent {}
-impl NazarustEvent for MouseEvent {}
 
 enum NazarustEvents {
     KeyEvent(KeyEvent),
