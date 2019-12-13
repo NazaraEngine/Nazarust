@@ -1,6 +1,6 @@
 use nphysics2d::material::BasicMaterial;
 
-use crate::Number;
+use crate::number::Number;
 
 pub struct Material<T: Number>
 {

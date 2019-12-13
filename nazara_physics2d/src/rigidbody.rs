@@ -7,7 +7,7 @@ use nphysics2d::object::{RigidBodyDesc, BodyStatus, DefaultBodyHandle, BodyPartH
 use crate::physworld::PhysWorld;
 use crate::collider::Collider;
 use crate::material::Material;
-use crate::Number;
+use crate::number::Number;
 
 pub enum RigidBodyStatus
 {

@@ -7,7 +7,7 @@ use nphysics2d::force_generator::DefaultForceGeneratorSet;
 use nphysics2d::joint::DefaultJointConstraintSet;
 use nphysics2d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};
 
-use crate::Number;
+use crate::number::Number;
 
 pub struct PhysWorld<T: Number>
 {

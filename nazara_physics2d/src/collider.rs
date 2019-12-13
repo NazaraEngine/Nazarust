@@ -5,7 +5,7 @@ use nphysics2d::material::MaterialHandle;
 use ncollide2d::shape;
 
 use crate::material::Material;
-use crate::Number;
+use crate::number::Number;
 
 pub enum Collider<T: Number>
 {
