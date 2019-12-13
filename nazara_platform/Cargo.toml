@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 winit = "0.20.0-alpha5"
 
+# I need to remove it
 [[bin]]
-name = "test"
+name = "test_windowing"
 path = "src/test_work.rs"

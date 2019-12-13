@@ -1,25 +1,26 @@
-use crate::winit_utility::{from_winit_event, NazarustEvent, NazarustEvents};
-use std::{cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
+use crate::winit_utility::{from_winit_event, NazarustEvents};
+use std::{collections::HashMap, hash::Hash};
 use winit::{
     dpi::LogicalSize,
-    event::{ElementState, Event as WinitEvent, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
 
 use crate::events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent};
-pub struct Window<T: NazarustEvent> {
+pub struct Window {
     window: Option<WinitWindow>,
     window_builder: WinitWindowBuilder,
     name: String,
     resizable: bool,
-    callbacks: HashMap<SimpleNazarustEvents<T>, Box<dyn FnMut()>>,
+    callbacks: HashMap<SimpleNazarustEvents, Box<dyn FnMut()>>,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-enum SimpleNazarustEvents<T: NazarustEvent> {
-    Event(T),
+enum SimpleNazarustEvents {
+    KeyEvent(KeyEvent),
+    MouseEvent(MouseEvent),
+    WindowEvent(NazarustWindowEvent),
 }
-impl<T: NazarustEvent> Window<T> {
+impl Window {
     fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
         let window_builder =
             WinitWindowBuilder::new()
@@ -37,32 +38,63 @@ impl<T: NazarustEvent> Window<T> {
             callbacks,
         }
     }
-    pub fn run_loop(&mut self) {
+    pub fn run_loop(mut self) {
         let event_loop = EventLoop::new();
-        self.window = Some(self.window_builder.clone().build(&event_loop).unwrap());
-        //let callback = Rc::clone(&self.callback);
+        self.window = Some(self.window_builder.clone().build(&event_loop).expect(
+            "Window 
+creation failed",
+        ));
         event_loop.run(move |event, _, control_flow| {
             let nazarust_event = from_winit_event(event);
             match nazarust_event {
-                NazarustEvents::KeyEvent(event, _) => (&mut *self
-                    .callbacks
-                    .get_mut(&SimpleNazarustEvents::Event(event))
-                    .unwrap())(),
-                NazarustEvents::MouseEvent(event, _) => (&mut *self
-                    .callbacks
-                    .get_mut(&SimpleNazarustEvents::Event(event))
-                    .unwrap())(),
-                NazarustEvents::WindowEvent(event) => (&mut *self
-                    .callbacks
-                    .get_mut(&SimpleNazarustEvents::Event(event))
-                    .unwrap())(),
-                //_ => panic!("Unknown event"),
+                NazarustEvents::KeyEvent(event, _) => {
+                    if let Some(lambda) = &mut self
+                        .callbacks
+                        .get_mut(&SimpleNazarustEvents::KeyEvent(event))
+                    {
+                        lambda();
+                    }
+                }
+                NazarustEvents::MouseEvent(event, _) => {
+                    if let Some(lambda) = &mut self
+                        .callbacks
+                        .get_mut(&SimpleNazarustEvents::MouseEvent(event))
+                    {
+                        lambda();
+                    }
+                }
+                NazarustEvents::WindowEvent(event) => {
+                    if let NazarustWindowEvent::CloseRequested = event {
+                        if let None = &mut self
+                            .callbacks
+                            .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                        {
+                            *control_flow = ControlFlow::Exit;
+                        }
+                    } else {
+                        if let Some(lambda) = &mut self
+                            .callbacks
+                            .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                        {
+                            lambda();
+                        }
+                    }
+                }
+                NazarustEvents::Unknown => (),
             };
         })
     }
-    pub fn set_callback(&mut self, event: T, lambda: Box<dyn FnMut()>) {
+    pub fn on_key_event(&mut self, event: KeyEvent, lambda: Box<dyn FnMut()>) {
         self.callbacks
-            .insert(SimpleNazarustEvents::Event(event), lambda);
+            .insert(SimpleNazarustEvents::KeyEvent(event), lambda);
+    }
+    pub fn on_mouse_event(&mut self, event: MouseEvent, lambda: Box<dyn FnMut()>) {
+        self.callbacks
+            .insert(SimpleNazarustEvents::MouseEvent(event), lambda);
+    }
+    pub fn on_window_event(&mut self, event: NazarustWindowEvent, lambda: Box<dyn FnMut()>) {
+        self.callbacks
+            .insert(SimpleNazarustEvents::WindowEvent(event), lambda);
     }
 }
 
@@ -85,7 +117,7 @@ impl<'b> WindowBuilder<'b> {
         self.resizable = true;
         self
     }
-    pub fn build_with<T: NazarustEvent>(&self, name: &'b str, size: (u32, u32)) -> Window<T> {
+    pub fn build_with(&self, name: &'b str, size: (u32, u32)) -> Window {
         Window::new(name.to_string(), size, self.resizable)
     }
 }

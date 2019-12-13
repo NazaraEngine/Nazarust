@@ -7,7 +7,6 @@ use winit::event::{
     ElementState, Event as WinitEvent, KeyboardInput, ModifiersState as WinitModifiersState,
     MouseButton as WinitMouseButton, VirtualKeyCode, WindowEvent,
 };
-
 pub trait NazarustEvent: Eq + Hash {}
 impl NazarustEvent for KeyEvent {}
 impl NazarustEvent for MouseEvent {}
