@@ -30,6 +30,6 @@ fn main()
         world.step((instant.elapsed().as_micros() as f64)/1_000_000.0);
         instant = Instant::now();
 
-        println!("{:?}", body.get_position());
+        println!("{:?}", body.get_position().unwrap());
     }
 }

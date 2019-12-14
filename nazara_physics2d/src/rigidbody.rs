@@ -78,8 +78,8 @@ pub struct RigidBody<T: Number>
 
 impl<T: Number> RigidBody<T>
 {
-    pub fn get_position(&self) -> Vector2<T>
+    pub fn get_position(&self) -> Option<Vector2<T>>
     {
-        self.body_set.upgrade().unwrap().borrow().rigid_body(self.body).unwrap().position().translation.vector
+        Some(self.body_set.upgrade()?.borrow().rigid_body(self.body)?.position().translation.vector)
     }
 }
