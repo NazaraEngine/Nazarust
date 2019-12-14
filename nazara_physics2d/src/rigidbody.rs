@@ -78,38 +78,6 @@ pub struct RigidBody<T: Number>
 
 impl<T: Number> RigidBody<T>
 {
-    /*pub fn new(world: &mut PhysWorld<T>, mass: T, collider: Option<&Collider<T>>, material: Option<&Material<T>>) -> Self // Material and Collider are linked if collider is None Material won't be used
-    {
-        let handle = world.body_set.borrow_mut().insert(RigidBodyDesc::new().mass(mass).build());
-
-        if let Some(c) = collider
-        {
-            world.collider_set.insert(c.create_desc(material).build(BodyPartHandle(handle, 0))); // if Material::density is not None and not zero mass and angular-inertia will be overriden
-        }
-
-        RigidBody
-        {
-            body: handle,
-            body_set: Rc::downgrade(&world.body_set),
-        }
-    }
-
-    pub fn new_static(world: &mut PhysWorld<T>, collider: Option<&Collider<T>>, material: Option<&Material<T>>) -> Self
-    {
-        let handle = world.body_set.borrow_mut().insert(RigidBodyDesc::new().status(BodyStatus::Static).build());
-
-        if let Some(c) = collider
-        {
-            world.collider_set.insert(c.create_desc(material).build(BodyPartHandle(handle, 0)));
-        }
-
-        RigidBody
-        {
-            body: handle,
-            body_set: Rc::downgrade(&world.body_set),
-        }
-    }*/
-
     pub fn get_position(&self) -> Vector2<T>
     {
         self.body_set.upgrade().unwrap().borrow().rigid_body(self.body).unwrap().position().translation.vector
