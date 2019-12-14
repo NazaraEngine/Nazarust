@@ -6,6 +6,7 @@ use std::time::Instant;
 
 use nazara_physics2d::physworld::PhysWorld;
 use nazara_physics2d::rigidbody::RigidBodyBuilder;
+//use nazara_physics2d::rigidbody::RigidBody;
 use nazara_physics2d::collider::Collider;
 use nazara_physics2d::material::Material;
 
@@ -21,7 +22,7 @@ fn main()
     let body = RigidBodyBuilder::new().mass(1.2).collider(&collider, Some(&material)).build(&mut world);
 
     let ground_collider = Collider::Box{ size: Vector2::new(20.0, 5.0), offset: Some(Point2::new(-10.0, -30.0)) };
-    let body = RigidBodyBuilder::new().make_static().collider(&ground_collider, None).build(&mut world); // mass is useles for static bodies 
+    let ground = RigidBodyBuilder::new().make_static().collider(&ground_collider, None).build(&mut world); // mass is useles for static bodies 
 
     let mut instant = Instant::now();
     loop
