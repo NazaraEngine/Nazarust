@@ -7,12 +7,15 @@ use winit::{
 };
 
 use crate::events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent};
+
+#[allow(dead_code)]
 pub struct Window {
     window: Option<WinitWindow>,
     window_builder: WinitWindowBuilder,
     name: String,
     resizable: bool,
     callbacks: HashMap<SimpleNazarustEvents, Box<dyn FnMut()>>,
+    mouse_moved_callback: Box<dyn FnMut((f64, f64))>,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum SimpleNazarustEvents {
@@ -30,12 +33,14 @@ impl Window {
                     width: size.1 as f64,
                 });
         let callbacks = HashMap::new();
+        let mouse_moved_callback = Box::new(|_: (f64, f64)| {});
         Self {
             window: None,
             window_builder,
             name,
             resizable,
             callbacks,
+            mouse_moved_callback,
         }
     }
     pub fn run_loop(mut self) {
@@ -47,7 +52,7 @@ creation failed",
         event_loop.run(move |event, _, control_flow| {
             let nazarust_event = from_winit_event(event);
             match nazarust_event {
-                NazarustEvents::KeyEvent(event, _) => {
+                NazarustEvents::KeyEvent(event) => {
                     if let Some(lambda) = &mut self
                         .callbacks
                         .get_mut(&SimpleNazarustEvents::KeyEvent(event))
@@ -55,8 +60,11 @@ creation failed",
                         lambda();
                     }
                 }
-                NazarustEvents::MouseEvent(event, _) => {
-                    if let Some(lambda) = &mut self
+                NazarustEvents::MouseEvent(event, position) => {
+                    if let MouseEvent::Moved = event {
+                        let position = position.unwrap();
+                        (self.mouse_moved_callback)((position.x, position.y));
+                    } else if let Some(lambda) = self
                         .callbacks
                         .get_mut(&SimpleNazarustEvents::MouseEvent(event))
                     {
@@ -65,19 +73,18 @@ creation failed",
                 }
                 NazarustEvents::WindowEvent(event) => {
                     if let NazarustWindowEvent::CloseRequested = event {
-                        if let None = &mut self
+                        if self
                             .callbacks
                             .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                            .is_none()
                         {
                             *control_flow = ControlFlow::Exit;
                         }
-                    } else {
-                        if let Some(lambda) = &mut self
-                            .callbacks
-                            .get_mut(&SimpleNazarustEvents::WindowEvent(event))
-                        {
-                            lambda();
-                        }
+                    } else if let Some(lambda) = &mut self
+                        .callbacks
+                        .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                    {
+                        lambda();
                     }
                 }
                 NazarustEvents::Unknown => (),
@@ -89,12 +96,19 @@ creation failed",
             .insert(SimpleNazarustEvents::KeyEvent(event), lambda);
     }
     pub fn on_mouse_event(&mut self, event: MouseEvent, lambda: Box<dyn FnMut()>) {
+        if let MouseEvent::Moved = event {
+            panic!("Use `on_mouse_moved_event` function instead of `on_mouse_event` for MouseEvent::Moved
+callback");
+        }
         self.callbacks
             .insert(SimpleNazarustEvents::MouseEvent(event), lambda);
     }
     pub fn on_window_event(&mut self, event: NazarustWindowEvent, lambda: Box<dyn FnMut()>) {
         self.callbacks
             .insert(SimpleNazarustEvents::WindowEvent(event), lambda);
+    }
+    pub fn on_mouse_moved_event(&mut self, lambda: Box<dyn FnMut((f64, f64))>) {
+        self.mouse_moved_callback = lambda;
     }
 }
 

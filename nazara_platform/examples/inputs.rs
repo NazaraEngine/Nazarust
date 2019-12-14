@@ -16,12 +16,23 @@ fn main() {
     );
     window.on_mouse_event(
         MouseEvent::Button {
-            state: State::Pressed,
-            mouse_button: MouseButton::Right,
+            state: State::Released,
+            mouse_button: MouseButton::Middle,
         },
         Box::new(move || {
-            println!("{}", y);
+            println!("Middle button released");
         }),
     );
+    window.on_window_event(
+        WindowEvent::Resized,
+        Box::new(move || {
+            println!("Resized !");
+        }),
+    );
+    window.on_mouse_moved_event(Box::new(move |pos: (f64, f64)| {
+        if pos.0 < 50.0 && pos.1 > 200.0 {
+            println!("{:#?}", pos);
+        }
+    }));
     window.run_loop();
 }
