@@ -5,7 +5,7 @@ extern crate ncollide2d;
 use std::time::Instant;
 
 use nazara_physics2d::physworld::PhysWorld;
-use nazara_physics2d::rigidbody::RigidBody;
+use nazara_physics2d::rigidbody::RigidBodyBuilder;
 use nazara_physics2d::collider::Collider;
 use nazara_physics2d::material::Material;
 
@@ -18,10 +18,10 @@ fn main()
 
     let material = Material::new(0.1, 0.0, None);
     let collider = Collider::Circle{ radius: 4.0, offset: None };
-    let body = RigidBody::new(&mut world, 1.0, Some(&collider), Some(&material));
+    let body = RigidBodyBuilder::new().mass(1.2).collider(&collider, Some(&material)).build(&mut world);
 
     let ground_collider = Collider::Box{ size: Vector2::new(20.0, 5.0), offset: Some(Point2::new(-10.0, -30.0)) };
-    let ground = RigidBody::new_static(&mut world, Some(&ground_collider), None); // mass is useles for static bodies 
+    let body = RigidBodyBuilder::new().make_static().collider(&ground_collider, None).build(&mut world); // mass is useles for static bodies 
 
     let mut instant = Instant::now();
     loop
