@@ -19,9 +19,9 @@ pub struct Window {
 }
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum SimpleNazarustEvents {
-    KeyEvent(KeyEvent),
-    MouseEvent(MouseEvent),
-    WindowEvent(NazarustWindowEvent),
+    Key(KeyEvent),
+    Mouse(MouseEvent),
+    Window(NazarustWindowEvent),
 }
 impl Window {
     fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
@@ -53,9 +53,8 @@ creation failed",
             let nazarust_event = from_winit_event(event);
             match nazarust_event {
                 NazarustEvents::KeyEvent(event) => {
-                    if let Some(lambda) = &mut self
-                        .callbacks
-                        .get_mut(&SimpleNazarustEvents::KeyEvent(event))
+                    if let Some(lambda) =
+                        &mut self.callbacks.get_mut(&SimpleNazarustEvents::Key(event))
                     {
                         lambda();
                     }
@@ -64,9 +63,8 @@ creation failed",
                     if let MouseEvent::Moved = event {
                         let position = position.unwrap();
                         (self.mouse_moved_callback)((position.x, position.y));
-                    } else if let Some(lambda) = self
-                        .callbacks
-                        .get_mut(&SimpleNazarustEvents::MouseEvent(event))
+                    } else if let Some(lambda) =
+                        self.callbacks.get_mut(&SimpleNazarustEvents::Mouse(event))
                     {
                         lambda();
                     }
@@ -75,14 +73,13 @@ creation failed",
                     if let NazarustWindowEvent::CloseRequested = event {
                         if self
                             .callbacks
-                            .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                            .get_mut(&SimpleNazarustEvents::Window(event))
                             .is_none()
                         {
                             *control_flow = ControlFlow::Exit;
                         }
-                    } else if let Some(lambda) = &mut self
-                        .callbacks
-                        .get_mut(&SimpleNazarustEvents::WindowEvent(event))
+                    } else if let Some(lambda) =
+                        &mut self.callbacks.get_mut(&SimpleNazarustEvents::Window(event))
                     {
                         lambda();
                     }
@@ -93,7 +90,7 @@ creation failed",
     }
     pub fn on_key_event(&mut self, event: KeyEvent, lambda: Box<dyn FnMut()>) {
         self.callbacks
-            .insert(SimpleNazarustEvents::KeyEvent(event), lambda);
+            .insert(SimpleNazarustEvents::Key(event), lambda);
     }
     pub fn on_mouse_event(&mut self, event: MouseEvent, lambda: Box<dyn FnMut()>) {
         if let MouseEvent::Moved = event {
@@ -101,18 +98,18 @@ creation failed",
 callback");
         }
         self.callbacks
-            .insert(SimpleNazarustEvents::MouseEvent(event), lambda);
+            .insert(SimpleNazarustEvents::Mouse(event), lambda);
     }
     pub fn on_window_event(&mut self, event: NazarustWindowEvent, lambda: Box<dyn FnMut()>) {
         self.callbacks
-            .insert(SimpleNazarustEvents::WindowEvent(event), lambda);
+            .insert(SimpleNazarustEvents::Window(event), lambda);
     }
     pub fn on_mouse_moved_event(&mut self, lambda: Box<dyn FnMut((f64, f64))>) {
         self.mouse_moved_callback = lambda;
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct WindowBuilder<'b> {
     name: &'b str,
     size: (u32, u32),
