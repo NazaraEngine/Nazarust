@@ -1,5 +1,5 @@
 use crate::{
-    events::{KeyEvent, MouseEvent, State, WindowEvent as NazarustWindowEvent},
+    events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent},
     winit_utility::{from_winit_event, NazarustEvent},
 };
 pub use winit::event_loop::ControlFlow;
