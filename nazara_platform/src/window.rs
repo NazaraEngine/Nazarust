@@ -1,14 +1,13 @@
+use crate::{
+    events::{KeyEvent, MouseEvent, State, WindowEvent as NazarustWindowEvent},
+    winit_utility::{from_winit_event, NazarustEvent},
+};
+pub use winit::event_loop::ControlFlow;
 use winit::{
     dpi::LogicalSize,
     event_loop::EventLoop,
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
-use crate::events::{
-    KeyEvent, MouseEvent, State,
-    WindowEvent as NazarustWindowEvent,
-};
-use crate::winit_utility::{from_winit_event, NazarustEvent};
-pub use winit::event_loop::ControlFlow;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum NazarustEvents {
@@ -40,11 +39,17 @@ impl Window {
             resizable,
         }
     }
-    pub fn run_loop(mut self, mut lambda: Box<dyn FnMut(NazarustEvents, &mut ControlFlow) + 'static>) {
+    pub fn run_loop(
+        mut self,
+        mut lambda: Box<dyn FnMut(NazarustEvents, &mut ControlFlow) + 'static>,
+    ) {
         let event_loop = EventLoop::new();
-        self.window = Some(self.window_builder.clone().build(&event_loop).expect(
-            "Window creation failed",
-        ));
+        self.window = Some(
+            self.window_builder
+                .clone()
+                .build(&event_loop)
+                .expect("Window creation failed"),
+        );
         event_loop.run(move |event, _, control_flow| {
             let nazarust_event = from_winit_event(event);
             match nazarust_event {
