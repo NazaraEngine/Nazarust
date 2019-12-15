@@ -28,8 +28,6 @@ impl Window {
     }
 }
 
-
-
 #[derive(Clone, Default)]
 pub struct WindowBuilder<'b> {
     name: &'b str,
