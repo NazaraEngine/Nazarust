@@ -1,7 +1,21 @@
 use winit::{
     dpi::LogicalSize,
+    event_loop::EventLoop,
     window::{Window as WinitWindow, WindowBuilder as WinitWindowBuilder},
 };
+use crate::events::{
+    KeyEvent, MouseEvent, State,
+    WindowEvent as NazarustWindowEvent,
+};
+use crate::winit_utility::{from_winit_event, NazarustEvent};
+pub use winit::event_loop::ControlFlow;
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum NazarustEvents {
+    Key(KeyEvent),
+    Mouse(MouseEvent),
+    Window(NazarustWindowEvent),
+}
 
 #[allow(dead_code)]
 pub struct Window {
@@ -11,7 +25,7 @@ pub struct Window {
     resizable: bool,
 }
 impl Window {
-    fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
+    pub fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
         let window_builder =
             WinitWindowBuilder::new()
                 .with_title(&name)
@@ -25,6 +39,27 @@ impl Window {
             name,
             resizable,
         }
+    }
+    pub fn run_loop(mut self, mut lambda: Box<dyn FnMut(NazarustEvents, &mut ControlFlow) + 'static>) {
+        let event_loop = EventLoop::new();
+        self.window = Some(self.window_builder.clone().build(&event_loop).expect(
+            "Window creation failed",
+        ));
+        event_loop.run(move |event, _, control_flow| {
+            let nazarust_event = from_winit_event(event);
+            match nazarust_event {
+                NazarustEvent::KeyEvent(event) => {
+                    lambda(NazarustEvents::Key(event), control_flow);
+                }
+                NazarustEvent::MouseEvent(event) => {
+                    lambda(NazarustEvents::Mouse(event), control_flow);
+                }
+                NazarustEvent::WindowEvent(event) => {
+                    lambda(NazarustEvents::Window(event), control_flow);
+                }
+                NazarustEvent::Unknown => (),
+            };
+        })
     }
 }
 
