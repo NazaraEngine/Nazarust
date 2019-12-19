@@ -85,7 +85,7 @@ impl<'b> WindowBuilder<'b> {
     }
     pub fn with_resizable(self) -> WindowBuilder<'b> {
         WindowBuilder {
-            resizable: true, 
+            resizable: true,
             ..self
         }
     }
