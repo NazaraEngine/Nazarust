@@ -83,9 +83,11 @@ impl<'b> WindowBuilder<'b> {
             resizable: false,
         }
     }
-    pub fn with_resizable(mut self) -> WindowBuilder<'b> {
-        self.resizable = true;
-        self
+    pub fn with_resizable(self) -> WindowBuilder<'b> {
+        WindowBuilder {
+            resizable: true, 
+            ..self
+        }
     }
     pub fn build_with(&self, name: &'b str, size: (u32, u32)) -> Window {
         Window::new(name.to_string(), size, self.resizable)
