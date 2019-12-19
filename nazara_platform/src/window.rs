@@ -41,7 +41,7 @@ impl Window {
     }
     pub fn run_loop(
         mut self,
-        mut lambda: Box<dyn FnMut(NazarustEvents, &mut ControlFlow) + 'static>,
+        mut callback: Box<dyn FnMut(NazarustEvents, &mut ControlFlow) + 'static>,
     ) {
         let event_loop = EventLoop::new();
         self.window = Some(
@@ -54,13 +54,13 @@ impl Window {
             let nazarust_event = from_winit_event(event);
             match nazarust_event {
                 NazarustEvent::KeyEvent(event) => {
-                    lambda(NazarustEvents::Key(event), control_flow);
+                    callback(NazarustEvents::Key(event), control_flow);
                 }
                 NazarustEvent::MouseEvent(event) => {
-                    lambda(NazarustEvents::Mouse(event), control_flow);
+                    callback(NazarustEvents::Mouse(event), control_flow);
                 }
                 NazarustEvent::WindowEvent(event) => {
-                    lambda(NazarustEvents::Window(event), control_flow);
+                    callback(NazarustEvents::Window(event), control_flow);
                 }
                 NazarustEvent::Unknown => (),
             };
