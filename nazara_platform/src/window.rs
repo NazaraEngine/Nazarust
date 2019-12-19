@@ -24,7 +24,7 @@ pub struct Window {
     resizable: bool,
 }
 impl Window {
-    pub fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
+    fn new(name: String, size: (u32, u32), resizable: bool) -> Self {
         let window_builder =
             WinitWindowBuilder::new()
                 .with_title(&name)
