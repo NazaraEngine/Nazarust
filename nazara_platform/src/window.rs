@@ -1,5 +1,5 @@
 use crate::{
-    events::{KeyEvent, MouseEvent, WindowEvent as NazarustWindowEvent},
+    events::{KeyState, MouseEvent, WindowEvent as NazarustWindowEvent},
     winit_utility::{from_winit_event, NazarustEvent},
 };
 pub use winit::event_loop::ControlFlow;
@@ -11,7 +11,7 @@ use winit::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum NazarustEvents {
-    Key(KeyEvent),
+    Key(KeyState),
     Mouse(MouseEvent),
     Window(NazarustWindowEvent),
 }
@@ -62,7 +62,7 @@ impl Window {
                 NazarustEvent::WindowEvent(event) => {
                     callback(NazarustEvents::Window(event), control_flow);
                 }
-                NazarustEvent::Unknown => (),
+                _ => (),
             };
         })
     }
