@@ -19,19 +19,22 @@ fn main()
 
 	let material = Material::new(0.1, 0.0, None);
 	let collider = Collider::Circle{ radius: 4.0, offset: None };
-	let body = RigidBodyBuilder::new().mass(1.2).collider(&collider, Some(&material)).build(&mut world);
+	let body = RigidBodyBuilder::new().mass(1.2) // simply set the mass of the body
+									  .collider(&collider, Some(&material)) // set a collider and optionally a material, material and collider are linked so they must be set together
+									  .build(&mut world); // simply build the rigidbody into the world
 
-	let ground_collider = Collider::Box{ size: Vector2::new(20.0, 5.0), offset: Some(Point2::new(-10.0, -30.0)) };
-	let ground = RigidBodyBuilder::new().make_static().collider(&ground_collider, None).build(&mut world); // mass is useles for static bodies 
+	let ground_collider = Collider::Box{ size: Vector2::new(20.0, 5.0), offset: Some(Point2::new(-10.0, -30.0)) }; // the offset is an internal translation, and it won't change the body's position, here (0, 0)
+	let ground = RigidBodyBuilder::new().make_static() // make the body static, so it won't move and it won't need a mass
+										.collider(&ground_collider, None) // set the collider and no material
+										.build(&mut world); // mwork as the other body 
 
-	let mut instant = Instant::now();
+	let mut instant = Instant::now(); // record the actual instant
 
-	instant
 	loop
 	{
-		world.step((instant.elapsed().as_micros() as f64)/1_000_000.0);
-		instant = Instant::now();
+		world.step((instant.elapsed().as_nanos() as f64) / 1_000_000_000.0); // tell the physical world to simulate the elapsed time since last step
+		instant = Instant::now(); // record the instant
 
-		println!("{:?}", body.get_position().unwrap());
+		println!("{:?}", body.get_position().unwrap()); // print the ball position
 	}
 }
