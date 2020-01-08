@@ -1,5 +1,17 @@
-use crate::enums::{ImageType, PixelFormatType};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, Cursor, Seek},
+    path::Path,
+};
+
 use cgmath::Vector3;
+use image::{DynamicImage, GenericImageView, io::Reader};
+use tracing::{event, instrument, Level};
+
+use crate::{
+    enums::{ImageType, PixelFormatType},
+    errors::{ImageError, NazaraError, NazaraResult},
+};
 
 /// Image structure for Nazarust
 ///
@@ -34,9 +46,10 @@ impl Image {
     /// * `width` - Width for the new image
     ///
     /// [`ImageType::Single1D`]: crate::enums::ImageType::Single1D
+    #[instrument]
     pub fn new_1d(format: PixelFormatType, width: usize) -> Image {
+        event!(Level::TRACE, "Create new one dimensional image with pixel format {:?} and size {}", format, width);
         let size = PixelFormatType::compute_size(format, width);
-
         Image {
             dimensions: Vector3::new(width, 1, 1),
             content: vec![vec![0u8; size]; 1],
@@ -64,9 +77,12 @@ impl Image {
     ///
     /// * `format` - Format for stored pixels
     /// * `width` - Width for the new image
+    /// * `height` - Height for new image
     ///
     /// [`ImageType::Single2D`]: crate::enums::ImageType::Single2D
+    #[instrument]
     pub fn new_2d(format: PixelFormatType, width: usize, height: usize) -> Image {
+        event!(Level::TRACE, "Create new two dimensional image with pixel format {:?} and size {}*{}", format, width, height);
         let size = PixelFormatType::compute_size(format, width * height);
 
         Image {
@@ -96,9 +112,13 @@ impl Image {
     ///
     /// * `format` - Format for stored pixels
     /// * `width` - Width for the new image
+    /// * `height` - Height for the new image
+    /// * `depth` - Depth of new image
     ///
     /// [`ImageType::Single3D`]: crate::enums::ImageType::Single3D
+    #[instrument]
     pub fn new_3d(format: PixelFormatType, width: usize, height: usize, depth: usize) -> Image {
+        event!(Level::TRACE, "Create new tri dimensional image with pixel format {:?} and size {}*{}*{}", format, width, height, depth);
         let size = PixelFormatType::compute_size(format, width * height * depth);
 
         Image {
@@ -174,5 +194,128 @@ impl Image {
     /// ```
     pub fn get_size(&self) -> Vector3<usize> {
         self.dimensions
+    }
+
+    pub fn set_content(&mut self, new_content: Vec<Vec<u8>>) {
+        self.content = new_content;
+    }
+}
+
+/// Image loader for Nazarust
+///
+///
+pub struct ImageLoader {}
+
+impl ImageLoader {
+    /// Load an image from file
+    ///
+    /// # Example
+    /// ```
+    /// use nazara_core::image::{ImageLoader, Image};
+    /// use std::path::Path;
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    /// let image: Image = ImageLoader::load_from_file(Path::new("./test_ressources/image.png")).unwrap();
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y: 629, z:1 });
+    /// ```
+    ///
+    /// # Arguments
+    /// * `file` - [`std::path::Path`] of file to load
+    #[instrument]
+    pub fn load_from_file(file: &Path) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from file {:?}", file);
+        let file = File::open(file).map_err(|e| NazaraError::from(ImageError::from(e)))?;
+        ImageLoader::load_from_reader(BufReader::new(file))
+    }
+
+    /// Load an image from memory
+    ///
+    /// # Example
+    /// ```
+    /// use std::fs;
+    /// use nazara_core::image::{Image, ImageLoader};
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    /// let image: Image = ImageLoader::load_from_mem(&fs::read("./test_ressources/image.png").unwrap()).unwrap();
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// ```
+    ///
+    /// # Arguments
+    /// * `image` - Array of image content
+    #[instrument]
+    pub fn load_from_mem(image: &[u8]) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from memory");
+        ImageLoader::load_from_reader(Cursor::new(image))
+    }
+
+    /// Load an image from stream ([`std::io::BufRead`], [`std::io::Seek`])
+    ///
+    /// # Load a png image
+    /// ```
+    /// use std::fs::File;
+    /// use nazara_core::image::{ImageLoader, Image};
+    /// use std::io::BufReader;
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    ///
+    /// let file = File::open("./test_ressources/image.png").unwrap();
+    /// let buf = BufReader::new(file);
+    ///
+    /// let image: Image = ImageLoader::load_from_reader(buf).unwrap();
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// ```
+    ///
+    /// # Load gif image
+    /// ```
+    /// use std::fs::File;
+    /// use nazara_core::image::{ImageLoader, Image};
+    /// use std::io::BufReader;
+    /// use nazara_core::enums::{PixelFormatType, ImageType};
+    /// use cgmath::Vector3;
+    ///
+    /// let file = File::open("./test_ressources/image.gif").unwrap();
+    /// let buf = BufReader::new(file);
+    ///
+    /// let image: Image = ImageLoader::load_from_reader(buf).unwrap();
+    ///
+    /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGBA8);
+    /// assert_eq!(image.get_image_type(), ImageType::Single2D);
+    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `reader` - Reader instance from which image will be loaded
+    pub fn load_from_reader<R: BufRead + Seek>(reader: R) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from buffer");
+        let reader = Reader::new(reader)
+            .with_guessed_format()
+            .map_err(|e| NazaraError::from(ImageError::from(e)))?;
+
+        let image = reader
+            .decode()
+            .map_err(|e| NazaraError::from(ImageError::from(e)))?;
+        let dimensions = image.dimensions();
+        let pixels = vec![image.raw_pixels()];
+        let color_type = match image {
+            DynamicImage::ImageLuma8(_) => PixelFormatType::L8,
+            DynamicImage::ImageLumaA8(_) => PixelFormatType::LA8,
+            DynamicImage::ImageRgb8(_) => PixelFormatType::RGB8,
+            DynamicImage::ImageRgba8(_) => PixelFormatType::RGBA8,
+            DynamicImage::ImageBgr8(_) => PixelFormatType::BGR8,
+            DynamicImage::ImageBgra8(_) => PixelFormatType::BGRA8,
+        };
+        let mut new_image = Image::new_2d(color_type, dimensions.0 as usize, dimensions.1 as usize);
+        new_image.set_content(pixels);
+        Ok(new_image)
     }
 }
