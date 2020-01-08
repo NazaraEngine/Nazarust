@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 cgmath = "0.17"
 image = "0.22"
+tracing = "0.1"

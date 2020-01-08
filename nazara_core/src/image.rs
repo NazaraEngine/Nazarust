@@ -5,7 +5,8 @@ use std::{
 };
 
 use cgmath::Vector3;
-use image::{io::Reader, DynamicImage, GenericImageView};
+use image::{DynamicImage, GenericImageView, io::Reader};
+use tracing::{event, instrument, Level};
 
 use crate::{
     enums::{ImageType, PixelFormatType},
@@ -45,9 +46,10 @@ impl Image {
     /// * `width` - Width for the new image
     ///
     /// [`ImageType::Single1D`]: crate::enums::ImageType::Single1D
+    #[instrument]
     pub fn new_1d(format: PixelFormatType, width: usize) -> Image {
+        event!(Level::TRACE, "Create new one dimensional image with pixel format {:?} and size {}", format, width);
         let size = PixelFormatType::compute_size(format, width);
-
         Image {
             dimensions: Vector3::new(width, 1, 1),
             content: vec![vec![0u8; size]; 1],
@@ -78,7 +80,9 @@ impl Image {
     /// * `height` - Height for new image
     ///
     /// [`ImageType::Single2D`]: crate::enums::ImageType::Single2D
+    #[instrument]
     pub fn new_2d(format: PixelFormatType, width: usize, height: usize) -> Image {
+        event!(Level::TRACE, "Create new two dimensional image with pixel format {:?} and size {}*{}", format, width, height);
         let size = PixelFormatType::compute_size(format, width * height);
 
         Image {
@@ -112,7 +116,9 @@ impl Image {
     /// * `depth` - Depth of new image
     ///
     /// [`ImageType::Single3D`]: crate::enums::ImageType::Single3D
+    #[instrument]
     pub fn new_3d(format: PixelFormatType, width: usize, height: usize, depth: usize) -> Image {
+        event!(Level::TRACE, "Create new tri dimensional image with pixel format {:?} and size {}*{}*{}", format, width, height, depth);
         let size = PixelFormatType::compute_size(format, width * height * depth);
 
         Image {
@@ -218,7 +224,9 @@ impl ImageLoader {
     ///
     /// # Arguments
     /// * `file` - [`std::path::Path`] of file to load
+    #[instrument]
     pub fn load_from_file(file: &Path) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from file {:?}", file);
         let file = File::open(file).map_err(|e| NazaraError::from(ImageError::from(e)))?;
         ImageLoader::load_from_reader(BufReader::new(file))
     }
@@ -240,7 +248,9 @@ impl ImageLoader {
     ///
     /// # Arguments
     /// * `image` - Array of image content
+    #[instrument]
     pub fn load_from_mem(image: &[u8]) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from memory");
         ImageLoader::load_from_reader(Cursor::new(image))
     }
 
@@ -286,6 +296,7 @@ impl ImageLoader {
     ///
     /// * `reader` - Reader instance from which image will be loaded
     pub fn load_from_reader<R: BufRead + Seek>(reader: R) -> NazaraResult<Image> {
+        event!(Level::TRACE, "Create image from buffer");
         let reader = Reader::new(reader)
             .with_guessed_format()
             .map_err(|e| NazaraError::from(ImageError::from(e)))?;
