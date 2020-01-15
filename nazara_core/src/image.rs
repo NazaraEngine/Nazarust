@@ -203,7 +203,10 @@ impl Image {
 
     /// Return how many byte are occupied by the first mipmap level of an [`Image`] instance.
     pub fn get_size(&self) -> usize {
-        self.dimensions.x * self.dimensions.y * self.dimensions.z
+        PixelFormatType::compute_size(
+            self.pixel_format,
+            self.dimensions.x * self.dimensions.y * self.dimensions.z,
+        )
     }
 
     /// Return how many byte are occupied by all mipmap levels of an [`Image`] instance.
@@ -227,19 +230,16 @@ impl Image {
     /// Return how many byte are occupied by the specified mipmap level of an [`Image`] instance.
     pub fn get_mipmap_size(&self, level: usize) -> usize {
         let dims = self.get_mipmap_dims(level);
-        dims.x * dims.y * dims.z
+        PixelFormatType::compute_size(self.pixel_format, dims.x * dims.y * dims.z)
     }
 
     /// Update the content (including all mipmaps) of an [`Image`] instance.
     pub fn update_content(&mut self, new_content: Vec<Vec<u8>>) {
         let level_count = self.content.len();
-        assert!(level_count == self.content.len());
+        assert!(level_count == new_content.len());
 
         for level in 0..level_count {
-            let expected_size =
-                PixelFormatType::compute_size(self.pixel_format, self.get_mipmap_size(level));
-
-            assert!(new_content.len() == expected_size);
+            assert!(new_content.len() == self.get_mipmap_size(level));
         }
 
         self.content = new_content;
