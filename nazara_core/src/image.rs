@@ -123,6 +123,18 @@ impl Image {
         }
     }
 
+    pub fn compute_mipmap_dims(dimensions: Vector3<usize>, level: usize) -> Vector3<usize> {
+        let width = (dimensions.x << level).max(1);
+        let height = (dimensions.y << level).max(1);
+        let depth = (dimensions.z << level).max(1);
+
+        Vector3 {
+            x: width,
+            y: height,
+            z: depth,
+        }
+    }
+
     /// Return image type of an [`Image`] instance.
     ///
     /// You can get image type from any [`Image`] instance:
@@ -167,9 +179,9 @@ impl Image {
         self.pixel_format
     }
 
-    /// Return size of an [`Image`] instance.
+    /// Return dimensions of an [`Image`] instance.
     ///
-    /// You can get size from any [`Image`] instance:
+    /// You can get dimensions from any [`Image`] instance:
     /// ```
     /// use nazara_core::image::Image;
     /// use nazara_core::enums::PixelFormatType;
@@ -186,12 +198,61 @@ impl Image {
     /// assert_eq!(img_2d_size, Vector3 { x: 40, y: 50, z: 1 });
     /// assert_eq!(img_3d_size, Vector3 { x: 40, y: 50, z: 60 });
     /// ```
-    pub fn get_size(&self) -> Vector3<usize> {
+    pub fn get_dims(&self) -> Vector3<usize> {
         self.dimensions
     }
 
-    pub fn set_content(&mut self, new_content: Vec<Vec<u8>>) {
+    /// Return how many byte are occupied by the first mipmap level of an [`Image`] instance.
+    pub fn get_size(&self) -> usize {
+        self.dimensions.x * self.dimensions.y * self.dimensions.z
+    }
+
+    /// Return how many byte are occupied by all mipmap levels of an [`Image`] instance.
+    pub fn get_total_size(&self) -> usize {
+        let level_count = self.content.len();
+
+        let mut size = 0;
+        for level in 0..level_count {
+            size += self.get_mipmap_size(level);
+        }
+
+        size
+    }
+
+    /// Return size of an [`Image`] instance at a specified mipmap level.
+    pub fn get_mipmap_dims(&self, level: usize) -> Vector3<usize> {
+        assert!(level < self.content.len(), "Invalid mipmap size");
+        Image::compute_mipmap_dims(self.dimensions, level)
+    }
+
+    /// Return how many byte are occupied by the specified mipmap level of an [`Image`] instance.
+    pub fn get_mipmap_size(&self, level: usize) -> usize {
+        let dims = self.get_mipmap_dims(level);
+        dims.x * dims.y * dims.z
+    }
+
+    /// Update the content (including all mipmaps) of an [`Image`] instance.
+    pub fn update_content(&mut self, new_content: Vec<Vec<u8>>) {
+        let level_count = self.content.len();
+        assert!(level_count == self.content.len());
+
+        for level in 0..level_count {
+            let expected_size =
+                PixelFormatType::compute_size(self.pixel_format, self.get_mipmap_size(level));
+
+            assert!(new_content.len() == expected_size);
+        }
+
         self.content = new_content;
+    }
+
+    /// Update the content of the specified mipmap level of an [`Image`] instance.
+    pub fn update_mipmap_content(&mut self, level: usize, new_content: Vec<u8>) {
+        let expected_size =
+            PixelFormatType::compute_size(self.pixel_format, self.get_mipmap_size(level));
+        assert!(new_content.len() == expected_size);
+
+        self.content[level] = new_content;
     }
 }
 
@@ -294,7 +355,6 @@ impl ImageLoader {
             .decode()
             .map_err(|e| NazaraError::from(ImageError::from(e)))?;
         let dimensions = image.dimensions();
-        let pixels = vec![image.raw_pixels()];
         let color_type = match image {
             DynamicImage::ImageLuma8(_) => PixelFormatType::L8,
             DynamicImage::ImageLumaA8(_) => PixelFormatType::LA8,
@@ -304,7 +364,7 @@ impl ImageLoader {
             DynamicImage::ImageBgra8(_) => PixelFormatType::BGRA8,
         };
         let mut new_image = Image::new_2d(color_type, dimensions.0 as usize, dimensions.1 as usize);
-        new_image.set_content(pixels);
+        new_image.update_mipmap_content(0, image.raw_pixels());
         Ok(new_image)
     }
 }
