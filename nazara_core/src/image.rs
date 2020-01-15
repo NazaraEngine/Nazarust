@@ -17,7 +17,6 @@ use crate::{
 /// Mettre ici une description plus avancé, j'ai pas encore compris à quoi ça sert
 pub struct Image {
     dimensions: Vector3<usize>,
-    #[allow(dead_code)]
     content: Vec<Vec<u8>>,
     image_type: ImageType,
     pixel_format: PixelFormatType,
@@ -34,7 +33,7 @@ impl Image {
     /// use cgmath::Vector3;
     ///
     /// let image = Image::new_1d(PixelFormatType::A8, 40);
-    /// assert_eq!(image.get_size(), Vector3 { x: 40, y: 1, z: 1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 40, y: 1, z: 1 });
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::A8);
     /// assert_eq!(image.get_image_type(), ImageType::Single1D);
     /// ```
@@ -66,7 +65,7 @@ impl Image {
     /// use cgmath::Vector3;
     ///
     /// let image = Image::new_2d(PixelFormatType::A8, 40, 50);
-    /// assert_eq!(image.get_size(), Vector3 { x: 40, y: 50, z: 1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 40, y: 50, z: 1 });
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::A8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
     /// ```
@@ -99,7 +98,7 @@ impl Image {
     /// use cgmath::Vector3;
     ///
     /// let image = Image::new_3d(PixelFormatType::A8, 40, 50, 60);
-    /// assert_eq!(image.get_size(), Vector3 { x: 40, y: 50, z: 60 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 40, y: 50, z: 60 });
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::A8);
     /// assert_eq!(image.get_image_type(), ImageType::Single3D);
     /// ```
@@ -190,13 +189,13 @@ impl Image {
     /// let img_1d = Image::new_1d(PixelFormatType::A8, 40);
     /// let img_2d = Image::new_2d(PixelFormatType::R16F, 40, 50);
     /// let img_3d = Image::new_3d(PixelFormatType::RGB16F, 40, 50, 60);
-    /// let img_1d_size = img_1d.get_size(); // img_1d_size is Vector3 { x: 40, y: 1, z: 1 }
-    /// let img_2d_size = img_2d.get_size(); // img_2d_size is Vector3 { x: 40, y: 50, z: 1 }
-    /// let img_3d_size = img_3d.get_size(); // img_3d_size is Vector3 { x: 40, y: 50, z: 60 }
+    /// let img_1d_dims = img_1d.get_dims(); // img_1d_dims is Vector3 { x: 40, y: 1, z: 1 }
+    /// let img_2d_dims = img_2d.get_dims(); // img_2d_dims is Vector3 { x: 40, y: 50, z: 1 }
+    /// let img_3d_dims = img_3d.get_dims(); // img_3d_dims is Vector3 { x: 40, y: 50, z: 60 }
     ///
-    /// assert_eq!(img_1d_size, Vector3 { x: 40, y: 1, z: 1 });
-    /// assert_eq!(img_2d_size, Vector3 { x: 40, y: 50, z: 1 });
-    /// assert_eq!(img_3d_size, Vector3 { x: 40, y: 50, z: 60 });
+    /// assert_eq!(img_1d_dims, Vector3 { x: 40, y: 1, z: 1 });
+    /// assert_eq!(img_2d_dims, Vector3 { x: 40, y: 50, z: 1 });
+    /// assert_eq!(img_3d_dims, Vector3 { x: 40, y: 50, z: 60 });
     /// ```
     pub fn get_dims(&self) -> Vector3<usize> {
         self.dimensions
@@ -274,7 +273,7 @@ impl ImageLoader {
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
-    /// assert_eq!(image.get_size(), Vector3 { x: 800, y: 629, z:1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 800, y: 629, z:1 });
     /// ```
     ///
     /// # Arguments
@@ -296,7 +295,7 @@ impl ImageLoader {
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
-    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 800, y:629, z:1 });
     /// ```
     ///
     /// # Arguments
@@ -322,7 +321,7 @@ impl ImageLoader {
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGB8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
-    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 800, y:629, z:1 });
     /// ```
     ///
     /// # Load gif image
@@ -340,7 +339,7 @@ impl ImageLoader {
     ///
     /// assert_eq!(image.get_pixel_format(), PixelFormatType::RGBA8);
     /// assert_eq!(image.get_image_type(), ImageType::Single2D);
-    /// assert_eq!(image.get_size(), Vector3 { x: 800, y:629, z:1 });
+    /// assert_eq!(image.get_dims(), Vector3 { x: 800, y:629, z:1 });
     /// ```
     ///
     /// # Arguments

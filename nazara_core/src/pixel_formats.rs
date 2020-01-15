@@ -52,6 +52,15 @@ impl PixelFormatType {
                 0x0000_FF00,
                 0,
             ),
+            PixelFormatType::RGBA8 => PixelFormatInfo::new(
+                "RGBA8",
+                32,
+                PixelFormatContent::ColorRGBA,
+                0xFF00_0000,
+                0x00FF_0000,
+                0x0000_FF00,
+                0x0000_00FF,
+            ),
             _ => PixelFormatInfo::new("TODO", 0, PixelFormatContent::ColorRGBA, 0, 0, 0, 0),
         }
     }
