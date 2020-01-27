@@ -247,9 +247,7 @@ impl Image {
 
     /// Update the content of the specified mipmap level of an [`Image`] instance.
     pub fn update_mipmap_content(&mut self, level: usize, new_content: Vec<u8>) {
-        let expected_size = self.get_mipmap_size(level);
-        assert!(new_content.len() == expected_size);
-
+        assert!(new_content.len() == self.get_mipmap_size(level));
         self.content[level] = new_content;
     }
 }
