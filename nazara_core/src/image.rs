@@ -14,7 +14,7 @@ use crate::{
 
 /// Image structure for Nazarust
 ///
-/// Mettre ici une description plus avancé, j'ai pas encore compris à quoi ça sert
+/// TODO: Mettre ici une description plus avancé, j'ai pas encore compris à quoi ça sert
 pub struct Image {
     dimensions: Vector3<usize>,
     content: Vec<Vec<u8>>,
@@ -122,10 +122,25 @@ impl Image {
         }
     }
 
+    /// Compute mipmap dimensions
+    ///
+    /// Return mipmap dimensions with a given dimension and size
+    ///
+    /// ```
+    /// use cgmath::Vector3;
+    /// use nazara_core::image::Image;
+    /// assert_eq!(Image::compute_mipmap_dims(Vector3 {x: 33,y: 68,z: 247}, 1), Vector3 {x: 33 >> 1, y: 68 >> 1, z: 247 >> 1});
+    /// assert_eq!(Image::compute_mipmap_dims(Vector3 {x: 1,y: 2,z: 4}, 1), Vector3 {x: 1, y: 1, z: 2});
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `dimensions` - Dimension of base image
+    /// * `level` - Mipmap level
     pub fn compute_mipmap_dims(dimensions: Vector3<usize>, level: usize) -> Vector3<usize> {
-        let width = (dimensions.x << level).max(1);
-        let height = (dimensions.y << level).max(1);
-        let depth = (dimensions.z << level).max(1);
+        let width = (dimensions.x >> level).max(1);
+        let height = (dimensions.y >> level).max(1);
+        let depth = (dimensions.z >> level).max(1);
 
         Vector3 {
             x: width,
@@ -202,6 +217,17 @@ impl Image {
     }
 
     /// Return how many byte are occupied by the first mipmap level of an [`Image`] instance.
+    ///
+    /// ```
+    /// use nazara_core::image::Image;
+    /// use nazara_core::enums::PixelFormatType;
+    /// let img_1d = Image::new_1d(PixelFormatType::RGB8, 40);
+    /// let img_2d = Image::new_2d(PixelFormatType::RGB8, 40, 50);
+    /// let img_3d = Image::new_3d(PixelFormatType::RGBA8, 40, 50, 60);
+    /// assert_eq!(img_1d.get_size(), 40*3);
+    /// assert_eq!(img_2d.get_size(), 40*50*3);
+    /// assert_eq!(img_3d.get_size(), 40*50*60*4);
+    /// ```
     pub fn get_size(&self) -> usize {
         PixelFormatType::compute_size(
             self.pixel_format,
@@ -210,6 +236,19 @@ impl Image {
     }
 
     /// Return how many byte are occupied by all mipmap levels of an [`Image`] instance.
+    ///
+    /// ```
+    /// use nazara_core::image::Image;
+    /// use nazara_core::enums::PixelFormatType;
+    /// // One mipmap level
+    /// // TODO: Test with multiple mipmap
+    /// let img_1d = Image::new_1d(PixelFormatType::RGB8, 40);
+    /// let img_2d = Image::new_2d(PixelFormatType::RGB8, 40, 50);
+    /// let img_3d = Image::new_3d(PixelFormatType::RGBA8, 40, 50, 60);
+    /// assert_eq!(img_1d.get_size(), 40*3);
+    /// assert_eq!(img_2d.get_size(), 40*50*3);
+    /// assert_eq!(img_3d.get_size(), 40*50*60*4);
+    /// ```
     pub fn get_total_size(&self) -> usize {
         let level_count = self.content.len();
 
@@ -222,12 +261,42 @@ impl Image {
     }
 
     /// Return size of an [`Image`] instance at a specified mipmap level.
+    ///
+    /// ```
+    /// use nazara_core::image::Image;
+    /// use nazara_core::enums::PixelFormatType;
+    /// use cgmath::Vector3;
+    /// // One mipmap level
+    /// // TODO: Test with multiple mipmap
+    /// let img_1d = Image::new_1d(PixelFormatType::RGB8, 40);
+    /// let img_2d = Image::new_2d(PixelFormatType::RGB8, 40, 50);
+    /// let img_3d = Image::new_3d(PixelFormatType::RGBA8, 40, 50, 60);
+    /// assert_eq!(img_1d.get_mipmap_dims(0), Vector3 {x: 40, y: 1, z: 1});
+    /// assert_eq!(img_2d.get_mipmap_dims(0), Vector3 {x: 40, y: 50, z: 1});
+    /// assert_eq!(img_3d.get_mipmap_dims(0), Vector3 {x: 40, y: 50, z: 60});
+    /// ```
+    ///
+    /// # Parameters
+    /// * `level` - Mipmap level
     pub fn get_mipmap_dims(&self, level: usize) -> Vector3<usize> {
         assert!(level < self.content.len(), "Invalid mipmap size");
         Image::compute_mipmap_dims(self.dimensions, level)
     }
 
     /// Return how many byte are occupied by the specified mipmap level of an [`Image`] instance.
+    ///
+    /// ```
+    /// use nazara_core::image::Image;
+    /// use nazara_core::enums::PixelFormatType;
+    /// // One mipmap level
+    /// // TODO: Test with multiple mipmap
+    /// let img_1d = Image::new_1d(PixelFormatType::RGB8, 40);
+    /// let img_2d = Image::new_2d(PixelFormatType::RGB8, 40, 50);
+    /// let img_3d = Image::new_3d(PixelFormatType::RGBA8, 40, 50, 60);
+    /// assert_eq!(img_1d.get_mipmap_size(0), 40*3);
+    /// assert_eq!(img_2d.get_mipmap_size(0), 40*50*3);
+    /// assert_eq!(img_3d.get_mipmap_size(0), 40*50*60*4);
+    /// ```
     pub fn get_mipmap_size(&self, level: usize) -> usize {
         let dims = self.get_mipmap_dims(level);
         PixelFormatType::compute_size(self.pixel_format, dims.x * dims.y * dims.z)
@@ -236,10 +305,10 @@ impl Image {
     /// Update the content (including all mipmaps) of an [`Image`] instance.
     pub fn update_content(&mut self, new_content: Vec<Vec<u8>>) {
         let level_count = self.content.len();
-        assert!(level_count == new_content.len());
+        assert_eq!(level_count, new_content.len());
 
         for level in 0..level_count {
-            assert!(new_content.len() == self.get_mipmap_size(level));
+            assert_eq!(new_content.len(), self.get_mipmap_size(level));
         }
 
         self.content = new_content;
@@ -247,14 +316,13 @@ impl Image {
 
     /// Update the content of the specified mipmap level of an [`Image`] instance.
     pub fn update_mipmap_content(&mut self, level: usize, new_content: Vec<u8>) {
-        assert!(new_content.len() == self.get_mipmap_size(level));
+        assert_eq!(new_content.len(), self.get_mipmap_size(level));
+
         self.content[level] = new_content;
     }
 }
 
 /// Image loader for Nazarust
-///
-///
 pub struct ImageLoader {}
 
 impl ImageLoader {

@@ -1,3 +1,4 @@
+pub mod application;
 pub mod color;
 pub mod enums;
 pub mod errors;
