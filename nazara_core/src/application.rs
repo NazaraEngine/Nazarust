@@ -1,12 +1,12 @@
 /// Represents a Nazara application
 pub struct Application {
-    should_close: bool
+    should_close: bool,
 }
 
 impl Application {
     pub fn new() -> Application {
         Application {
-            should_close: false
+            should_close: false,
         }
     }
 
@@ -16,5 +16,5 @@ impl Application {
 
     pub fn run(mut self) {
         while self.execute() {}
-    } 
+    }
 }
